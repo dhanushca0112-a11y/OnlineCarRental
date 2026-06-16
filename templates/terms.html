@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Terms & Conditions - DCA Car Rentals{% endblock %}
+{% block content %}
+<style>
+.legal-wrap{max-width:860px;margin:0 auto;padding:0 1.5rem 5rem}
+.legal-card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:2.5rem;margin-bottom:1.25rem;transition:all .3s}
+.legal-card:hover{border-color:rgba(245,158,11,.2)}
+.legal-card h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:10px}
+.legal-card h2 i{width:20px;text-align:center}
+.legal-card p,.legal-card li{font-size:.9rem;color:var(--text2);line-height:1.8;margin-bottom:.6rem}
+.legal-card ul,.legal-card ol{padding-left:1.25rem;margin-bottom:.5rem}
+.legal-card li{margin-bottom:.4rem}
+.legal-toc{background:var(--accent-dim);border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:1.5rem;margin-bottom:2rem}
+.legal-toc h3{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:.75rem;color:var(--accent)}
+.legal-toc ul{list-style:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:.3rem}
+.legal-toc ul a{font-size:.82rem;color:var(--text2);transition:color .2s;display:flex;align-items:center;gap:5px}
+.legal-toc ul a:hover{color:var(--accent)}
+.highlight-box{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:1rem;margin:.75rem 0}
+.warning-box{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:1rem;margin:.75rem 0;font-size:.85rem;color:var(--text2)}
+</style>
+
+<div class="page-header">
+  <div class="container">
+    <div class="eyebrow"><i class="fas fa-file-contract"></i> Legal</div>
+    <h1>Terms &amp; <span style="color:var(--accent)">Conditions</span></h1>
+    <p>Last updated: June 2026 &nbsp;&nbsp; </p>
+  </div>
+</div>
+
+<div class="legal-wrap" style="padding-top:2.5rem;">
+  <div class="legal-toc">
+    <h3><i class="fas fa-list"></i> Table of Contents</h3>
+    <ul>
+      <li><a href="#acceptance"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Acceptance of Terms</a></li>
+      <li><a href="#eligibility"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Eligibility & Documents</a></li>
+      <li><a href="#booking"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Booking & Reservations</a></li>
+      <li><a href="#pricing"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Pricing & Payment</a></li>
+      <li><a href="#cancellation"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Cancellation & Refunds</a></li>
+      <li><a href="#usage"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Vehicle Usage Rules</a></li>
+      <li><a href="#liability"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Liability & Insurance</a></li>
+      <li><a href="#driver"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Driver Services</a></li>
+      <li><a href="#safety"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Women's Safety</a></li>
+      <li><a href="#disputes"><i class="fas fa-chevron-right" style="font-size:.6rem"></i> Disputes & Governing Law</a></li>
+    </ul>
+  </div>
+
+  <div class="legal-card" id="acceptance">
+    <h2><i class="fas fa-check-circle"></i> 1. Acceptance of Terms</h2>
+    <p>By accessing or using the DCA Car Rentals website or mobile application, making a booking, or using any of our services, you ("Customer", "User") agree to be bound by these Terms and Conditions.</p>
+    <p>These terms constitute a legally binding agreement between you and DCA Car Rentals (operated by Dhanush, Karnataka, India). If you do not agree to these terms, please do not use our services.</p>
+    <div class="highlight-box"><i class="fas fa-info-circle" style="color:var(--accent)"></i> By clicking "Confirm Booking" or completing payment, you confirm that you have read, understood, and accepted all terms herein.</div>
+  </div>
+
+  <div class="legal-card" id="eligibility">
+    <h2><i class="fas fa-id-card"></i> 2. Eligibility &amp; Required Documents</h2>
+    <p>To rent a vehicle from DCA Car Rentals, you must:</p>
+    <ul>
+      <li>Be at least 18 years of age at the time of booking.</li>
+      <li>Hold a valid Indian driving licence (for self-drive) issued at least 1 year prior to rental.</li>
+      <li>Provide a valid government-issued photo identity proof (Aadhaar, Passport, or Voter ID).</li>
+      <li>Not be under the influence of alcohol, narcotics, or any substance that impairs driving ability.</li>
+      <li>Have a valid credit/debit card or UPI ID for payment and security deposit.</li>
+    </ul>
+    <p>DCA Car Rentals reserves the right to refuse service to any customer who fails to provide valid documentation.</p>
+  </div>
+
+  <div class="legal-card" id="booking">
+    <h2><i class="fas fa-calendar-check"></i> 3. Booking &amp; Reservations</h2>
+    <p>All bookings are subject to vehicle availability and DCA Car Rentals' confirmation. A booking is considered confirmed only after:</p>
+    <ol>
+      <li>You complete the booking form with correct details.</li>
+      <li>Payment is successfully made and the UPI transaction ID/UTR is submitted.</li>
+      <li>Admin verifies payment and changes the booking status to <strong>"Confirmed"</strong>.</li>
+    </ol>
+    <p>Payment verification typically takes 30–60 minutes during business hours (8 AM – 9 PM IST). Payments made outside business hours will be verified the next business day.</p>
+    <div class="warning-box"><i class="fas fa-exclamation-triangle" style="color:var(--red)"></i> <strong>Warning:</strong> Do not travel without a confirmed booking. DCA Car Rentals is not responsible for any issues arising from unconfirmed bookings.</div>
+    <p>Booking details (pickup/drop location, dates, drive mode, gender preference) must be accurate. Any false information may result in immediate booking cancellation without refund.</p>
+  </div>
+
+  <div class="legal-card" id="pricing">
+    <h2><i class="fas fa-rupee-sign"></i> 4. Pricing &amp; Payment</h2>
+    <p>Our pricing structure is completely transparent:</p>
+    <ul>
+      <li><strong>Per-Day Charge:</strong> Fixed rate for each 24-hour rental period.</li>
+      <li><strong>Per-KM Charge:</strong> Applied based on the actual route distance from pickup to drop location.</li>
+      <li><strong>Driver Surcharge:</strong> ₹800 per day for "With Driver" bookings.</li>
+      <li><strong>Night Safety Add-on:</strong> ₹200 flat charge for female customers with pickup after 10:00 PM.</li>
+      <li><strong>GST:</strong> 18% Goods and Services Tax applied on all subtotals as per Indian law.</li>
+    </ul>
+    <p>Payments are accepted via UPI (dhanush4653-1@okaxis) and other digital methods. Cash payments are not accepted. All transactions are processed securely.</p>
+    <div class="highlight-box"><i class="fas fa-shield-alt" style="color:var(--green)"></i> DCA Car Rentals does not store your payment card details. All payments are processed through secure UPI channels.</div>
+  </div>
+
+  <div class="legal-card" id="cancellation">
+    <h2><i class="fas fa-times-circle"></i> 5. Cancellation &amp; Refund Policy</h2>
+    <ul>
+      <li><strong>Free cancellation:</strong> Cancel more than 24 hours before the pickup date/time — full refund within 5–7 business days.</li>
+      <li><strong>Partial refund:</strong> Cancel within 12–24 hours of pickup — 50% of the booking amount refunded.</li>
+      <li><strong>No refund:</strong> Cancellation within 12 hours of pickup or no-show — no refund applicable.</li>
+      <li><strong>DCA-initiated cancellation:</strong> If DCA cancels your booking (e.g., vehicle breakdown, unavailability) — 100% refund within 3 business days.</li>
+    </ul>
+    <p>Refunds are processed to the original payment method. Contact Dhanush at +91 6362948259 for refund-related queries.</p>
+  </div>
+
+  <div class="legal-card" id="usage">
+    <h2><i class="fas fa-car"></i> 6. Vehicle Usage Rules</h2>
+    <p>By renting a DCA vehicle, you agree to:</p>
+    <ul>
+      <li>Use the vehicle only for lawful purposes.</li>
+      <li>Not sub-let, lease, or share the vehicle with any third party without prior written consent.</li>
+      <li>Not drive the vehicle outside India.</li>
+      <li>Not carry more passengers than the vehicle's registered seating capacity.</li>
+      <li>Not carry hazardous materials, explosives, or illegal substances.</li>
+      <li>Not smoke inside the vehicle. A ₹1,000 cleaning charge applies for violations.</li>
+      <li>Return the vehicle in the same condition as received, with the same fuel level.</li>
+      <li>Report any accident, damage, or theft immediately to DCA at +91 6362948259.</li>
+    </ul>
+    <div class="warning-box"><i class="fas fa-exclamation-triangle" style="color:var(--red)"></i> Drunk driving or driving under the influence is strictly prohibited. Any violation will result in immediate termination of rental and legal action.</div>
+  </div>
+
+  <div class="legal-card" id="liability">
+    <h2><i class="fas fa-balance-scale"></i> 7. Liability &amp; Insurance</h2>
+    <p>All DCA vehicles carry comprehensive motor insurance as required under Indian law. However:</p>
+    <ul>
+      <li>The customer is liable for any traffic fines, challans, or toll charges incurred during the rental period.</li>
+      <li>In case of an accident caused by the customer's negligence, the insurance deductible/excess may apply.</li>
+      <li>DCA Car Rentals is not liable for personal belongings left in the vehicle.</li>
+      <li>DCA is not liable for any consequential, indirect, or incidental damages arising from vehicle use.</li>
+      <li>Total liability of DCA to any customer shall not exceed the amount paid for the specific booking.</li>
+    </ul>
+  </div>
+
+  <div class="legal-card" id="driver">
+    <h2><i class="fas fa-user-tie"></i> 8. Driver Services</h2>
+    <p>When you select "With Driver" option:</p>
+    <ul>
+      <li>DCA will assign a background-verified, licensed professional driver.</li>
+      <li>Driver working hours: Up to 12 hours per day. Additional hours charged at ₹100/hour.</li>
+      <li>Customers must treat drivers with respect. Any harassment or abuse will result in immediate trip termination.</li>
+      <li>Drivers are not permitted to transport passengers other than the booking customer's party.</li>
+      <li>Female driver preference is on a best-effort basis and subject to availability.</li>
+    </ul>
+  </div>
+
+  <div class="legal-card" id="safety">
+    <h2><i class="fas fa-shield-alt" style="color:var(--pink)"></i> 9. Women's Safety Features</h2>
+    <p>DCA Car Rentals is committed to the safety of all female travellers:</p>
+    <ul>
+      <li>Night safety charge (₹200) applies to female customers booking trips with pickup after 10:00 PM.</li>
+      <li>SOS emergency button connects to local emergency services and your nominated contacts.</li>
+      <li>GPS tracking is shared only with contacts nominated by the customer.</li>
+      <li>Dashcam recordings are stored for 72 hours and deleted automatically unless an incident is reported.</li>
+      <li>In case of any safety concern, call DCA Emergency at +91 6362948259 or Women's Helpline 1091.</li>
+    </ul>
+  </div>
+
+  <div class="legal-card" id="disputes">
+    <h2><i class="fas fa-gavel"></i> 10. Disputes &amp; Governing Law</h2>
+    <p>These Terms and Conditions are governed by the laws of India, specifically the laws of the State of Karnataka.</p>
+    <p>Any dispute arising out of or in connection with these terms shall first be attempted to be resolved amicably through direct communication with Dhanush at +91 6362948259 or dhanush@dcacarrentals.com.</p>
+    <p>If unresolved within 30 days, disputes shall be subject to the exclusive jurisdiction of courts in Karnataka, India.</p>
+    <p>DCA Car Rentals reserves the right to modify these terms at any time. Updated terms will be published on this page with the revision date.</p>
+    <div class="highlight-box" style="margin-top:1rem;"><strong>Contact for Legal Notices:</strong><br>Dhanush — DCA Car Rentals<br>Phone: +91 6362948259<br>Email: dhanush@dcacarrentals.com<br>Karnataka, India</div>
+  </div>
+</div>
+{% endblock %}

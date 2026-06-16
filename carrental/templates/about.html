@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}About Us - DCA Car Rentals{% endblock %}
+{% block content %}
+<style>
+.about-hero{background:linear-gradient(135deg,var(--bg2) 0%,var(--bg) 100%);padding:5rem 0 4rem;position:relative;overflow:hidden;border-bottom:1px solid var(--card-border)}
+.about-hero::before{content:'';position:absolute;top:-50%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(245,158,11,.06) 0%,transparent 65%);border-radius:50%}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.about-img-wrap{position:relative}
+.about-img{width:100%;border-radius:24px;height:420px;object-fit:cover;box-shadow:0 32px 64px rgba(0,0,0,.4)}
+.about-img-badge{position:absolute;bottom:-20px;left:-20px;background:var(--accent);color:#000;padding:1.25rem 1.5rem;border-radius:16px;font-family:'Syne',sans-serif;font-weight:800;box-shadow:0 8px 24px rgba(245,158,11,.4)}
+.about-img-badge .num{font-size:2rem;display:block;line-height:1}
+.about-img-badge .lbl{font-size:.75rem;font-weight:600;opacity:.8}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:4rem 0}
+.stat-box{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:1.5rem;text-align:center;transition:all .3s}
+.stat-box:hover{border-color:rgba(245,158,11,.3);transform:translateY(-3px)}
+.stat-box .num{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;color:var(--accent)}
+.stat-box .lbl{font-size:.8rem;color:var(--text2);margin-top:4px}
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.team-card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:2rem;text-align:center;transition:all .3s}
+.team-card:hover{border-color:rgba(245,158,11,.3);transform:translateY(-4px)}
+.team-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto 1rem;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:#000}
+.team-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:3px}
+.team-role{font-size:.8rem;color:var(--accent);font-weight:600;margin-bottom:.5rem}
+.team-bio{font-size:.825rem;color:var(--text2);line-height:1.6}
+.value-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.value-card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:2rem;transition:all .3s}
+.value-card:hover{border-color:rgba(245,158,11,.3);transform:translateY(-3px)}
+.value-icon{width:54px;height:54px;border-radius:14px;background:var(--accent-dim);border:1px solid rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:var(--accent);margin-bottom:1rem;transition:all .3s}
+.value-card:hover .value-icon{background:var(--accent);color:#000}
+.faq-item{background:var(--card);border:1px solid var(--card-border);border-radius:14px;margin-bottom:.75rem;overflow:hidden}
+.faq-q{width:100%;background:transparent;border:none;padding:1.1rem 1.25rem;text-align:left;color:var(--text);font-size:.925rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;transition:all .2s}
+.faq-q:hover{color:var(--accent)}
+.faq-q i{color:var(--accent);transition:transform .3s;flex-shrink:0}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.faq-a.open{max-height:300px}
+.faq-a p{padding:.25rem 1.25rem 1.1rem;color:var(--text2);font-size:.875rem;line-height:1.7}
+@media(max-width:900px){.about-grid{grid-template-columns:1fr}.about-img-wrap{display:none}.stat-row{grid-template-columns:1fr 1fr}.team-grid,.value-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.stat-row{grid-template-columns:1fr 1fr}}
+</style>
+
+<!-- HERO -->
+<section class="about-hero">
+  <div class="container">
+    <div class="about-grid">
+      <div>
+        <div class="eyebrow"><i class="fas fa-building"></i> About DCA Car Rentals</div>
+        <h1 style="font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem;">
+          Driving India<br><span style="color:var(--accent)">Forward, Together.</span>
+        </h1>
+        <p style="font-size:1.05rem;color:var(--text2);line-height:1.8;max-width:500px;margin-bottom:2rem;">
+          DCA Car Rentals was founded with a single mission: to make premium car rental accessible to every Indian traveller. From the Himalayan foothills to coastal Karnataka, we've got your journey covered.
+        </p>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <a href="/cars" class="btn btn-primary btn-lg"><i class="fas fa-car"></i> Explore Fleet</a>
+          <a href="/contact" class="btn btn-secondary btn-lg"><i class="fas fa-phone"></i> Talk to Us</a>
+        </div>
+      </div>
+      <div class="about-img-wrap">
+        <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&q=80" alt="DCA Car Rentals" class="about-img">
+        <div class="about-img-badge"><span class="num">5★</span><span class="lbl">Rated Service</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="container">
+  <div class="stat-row">
+    <div class="stat-box"><div class="num">6+</div><div class="lbl">Premium Cars</div></div>
+    <div class="stat-box"><div class="num">25+</div><div class="lbl">Cities Covered</div></div>
+    <div class="stat-box"><div class="num">500+</div><div class="lbl">Happy Customers</div></div>
+    <div class="stat-box"><div class="num">24/7</div><div class="lbl">Customer Support</div></div>
+  </div>
+</div>
+
+<!-- STORY -->
+<section class="section">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
+      <div>
+        <div class="eyebrow"><i class="fas fa-book-open"></i> Our Story</div>
+        <h2 class="section-title" style="margin-bottom:1.5rem;">Started with a Dream,<br><span class="text-accent">Built on Trust</span></h2>
+        <p style="color:var(--text2);line-height:1.8;margin-bottom:1rem;">DCA Car Rentals was born out of a personal frustration — overpriced, unreliable rental services with hidden fees and no transparency. Dhanush set out to change that.</p>
+        <p style="color:var(--text2);line-height:1.8;margin-bottom:1rem;">Today, DCA Car Rentals operates across Karnataka and beyond, offering a curated fleet of India's finest vehicles — from the rugged Mahindra Thar to the luxurious Toyota Innova Crysta.</p>
+        <p style="color:var(--text2);line-height:1.8;">We believe every journey should be comfortable, safe, and memorable — whether you're on a weekend getaway, a business trip, or a family road trip.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div style="background:var(--accent-dim);border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:1.5rem;">
+          <i class="fas fa-handshake" style="font-size:1.5rem;color:var(--accent);margin-bottom:.75rem;display:block;"></i>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.4rem;">Transparent Pricing</div>
+          <div style="font-size:.825rem;color:var(--text2);">What you see is what you pay. No hidden charges ever.</div>
+        </div>
+        <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:16px;padding:1.5rem;">
+          <i class="fas fa-shield-alt" style="font-size:1.5rem;color:var(--green);margin-bottom:.75rem;display:block;"></i>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.4rem;">Fully Insured</div>
+          <div style="font-size:.825rem;color:var(--text2);">Every vehicle comprehensively insured for your peace of mind.</div>
+        </div>
+        <div style="background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:16px;padding:1.5rem;">
+          <i class="fas fa-star" style="font-size:1.5rem;color:var(--blue);margin-bottom:.75rem;display:block;"></i>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.4rem;">Premium Fleet</div>
+          <div style="font-size:.825rem;color:var(--text2);">Only the latest, well-maintained Indian cars in our lineup.</div>
+        </div>
+        <div style="background:rgba(236,72,153,.06);border:1px solid rgba(236,72,153,.15);border-radius:16px;padding:1.5rem;">
+          <i class="fas fa-female" style="font-size:1.5rem;color:var(--pink);margin-bottom:.75rem;display:block;"></i>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.4rem;">Women's Safety</div>
+          <div style="font-size:.825rem;color:var(--text2);">Dedicated safety features for female travellers, day & night.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="section" style="background:var(--bg2);border-top:1px solid var(--card-border);border-bottom:1px solid var(--card-border);">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <div class="eyebrow"><i class="fas fa-heart"></i> Our Values</div>
+      <h2 class="section-title">What We Stand For</h2>
+    </div>
+    <div class="value-grid">
+      <div class="value-card">
+        <div class="value-icon"><i class="fas fa-rupee-sign"></i></div>
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;">Fair Pricing</h3>
+        <p style="font-size:.875rem;color:var(--text2);line-height:1.7;">Clear per-day + per-km pricing with GST breakdown. No surprises at checkout — ever.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><i class="fas fa-users"></i></div>
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;">Customer First</h3>
+        <p style="font-size:.875rem;color:var(--text2);line-height:1.7;">Every decision we make starts with one question: how does this serve our customer better?</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><i class="fas fa-leaf"></i></div>
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;">Sustainability</h3>
+        <p style="font-size:.875rem;color:var(--text2);line-height:1.7;">We're gradually adding electric vehicles to our fleet to build a greener India.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><i class="fas fa-lock"></i></div>
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;">Safety First</h3>
+        <p style="font-size:.875rem;color:var(--text2);line-height:1.7;">All vehicles undergo rigorous safety checks before every rental. Women's safety add-ons available.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><i class="fas fa-headset"></i></div>
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;">Always Available</h3>
+        <p style="font-size:.875rem;color:var(--text2);line-height:1.7;">24/7 support line and in-app assistance. We're with you every kilometre of your journey.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon"><i class="fas fa-award"></i></div>
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.5rem;">Quality Fleet</h3>
+        <p style="font-size:.875rem;color:var(--text2);line-height:1.7;">Carefully curated vehicles from top Indian brands — serviced, sanitized, and ready to roll.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="section">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <div class="eyebrow"><i class="fas fa-users"></i> The Team</div>
+      <h2 class="section-title">People Behind DCA</h2>
+    </div>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar">D</div>
+        <div class="team-name">Dhanush</div>
+        <div class="team-role">Founder & CEO</div>
+        <p class="team-bio">Passionate about mobility and technology. Founded DCA Car Rentals to make premium travel accessible to every Indian. Contact: +91 6362948259</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:linear-gradient(135deg,var(--green),var(--blue))">O</div>
+        <div class="team-name">Operations Team</div>
+        <div class="team-role">Fleet & Logistics</div>
+        <p class="team-bio">Ensuring every car is pristine, every booking confirmed on time, and every customer gets a seamless experience from start to finish.</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar" style="background:linear-gradient(135deg,var(--pink),var(--purple))">S</div>
+        <div class="team-name">Safety Team</div>
+        <div class="team-role">Customer Safety</div>
+        <p class="team-bio">Dedicated to women's safety initiatives, background verification of drivers, and 24/7 emergency response for all customers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" style="background:var(--bg2);border-top:1px solid var(--card-border);" id="faq">
+  <div class="container-sm">
+    <div style="text-align:center;margin-bottom:2.5rem;">
+      <div class="eyebrow"><i class="fas fa-question-circle"></i> FAQ</div>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+    </div>
+    {% for q, a in [
+      ("What documents do I need to rent a car?", "You'll need a valid Indian driving licence (minimum 1 year old), Aadhaar card or passport for identity verification, and a credit/debit card for the security deposit."),
+      ("Is there a minimum rental period?", "Yes, our minimum rental period is 1 day (24 hours). There is no maximum limit — you can rent for as many days as you need."),
+      ("What is included in the per-day price?", "The per-day price covers the base vehicle rental. Additional charges include per-km driven (above base), GST (18%), driver charge if selected (₹800/day), and night safety add-on for female customers (₹200 after 10 PM)."),
+      ("Can I cancel my booking?", "Yes, you can cancel your booking for free up to 24 hours before the pickup date. Cancellations within 24 hours may incur a small fee."),
+      ("How does payment verification work?", "After you pay via UPI, you enter your UTR/transaction ID. Our admin team verifies the payment within 10 minutes and confirms your booking."),
+      ("Are the cars insured?", "Yes, all DCA vehicles carry comprehensive insurance. In case of an accident, please contact us immediately at +91 6362948259.")
+    ] %}
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">
+        {{ q }}
+        <i class="fas fa-plus"></i>
+      </button>
+      <div class="faq-a"><p>{{ a }}</p></div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+function toggleFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const icon = btn.querySelector('i');
+  const isOpen = ans.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.faq-q i').forEach(i => { i.className='fas fa-plus'; });
+  if (!isOpen) { ans.classList.add('open'); icon.className='fas fa-minus'; }
+}
+</script>
+{% endblock %}

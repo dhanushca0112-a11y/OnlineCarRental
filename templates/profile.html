@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}My Profile - DCA Car Rentals{% endblock %}
+{% block content %}
+<style>
+.profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 2rem; padding: 2rem 0 4rem; }
+.profile-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; text-align: center; height: fit-content; position: sticky; top: 84px; }
+.avatar { width: 90px; height: 90px; border-radius: 50%; margin: 0 auto 1rem; background: linear-gradient(135deg, var(--accent), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; color: #000; font-family: 'Syne', sans-serif; }
+.profile-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; }
+.profile-email { color: var(--text2); font-size: 0.875rem; margin-top: 4px; }
+.profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1.25rem 0; }
+.pstat { background: var(--bg3); border-radius: 12px; padding: 0.75rem; }
+.pstat-val { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+.pstat-label { font-size: 0.75rem; color: var(--text2); }
+.edit-form { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; }
+.edit-form h2 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.member-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 8px; }
+@media (max-width: 768px) { .profile-layout { grid-template-columns: 1fr; } .profile-card { position: static; } .form-row { grid-template-columns: 1fr; } }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1>My <span style="color:var(--accent)">Profile</span></h1>
+        <p>Manage your account details</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="profile-layout">
+        <div class="profile-card">
+            <div class="avatar">{{ user.name[0].upper() }}</div>
+            <div class="profile-name">{{ user.name }}</div>
+            <div class="profile-email">{{ user.email }}</div>
+            <div class="member-badge"><i class="fas fa-star"></i> DCA Car Rentals Member</div>
+            <div class="profile-stats">
+                <div class="pstat"><div class="pstat-val">{{ bookings_count }}</div><div class="pstat-label">Bookings</div></div>
+                <div class="pstat"><div class="pstat-val">{{ reviews_count }}</div><div class="pstat-label">Reviews</div></div>
+            </div>
+            <div style="padding-top:1rem;border-top:1px solid var(--card-border);">
+                <div style="font-size:0.8rem;color:var(--text2);margin-bottom:0.5rem;">Member since</div>
+                <div style="font-size:0.875rem;font-weight:600;">{{ user.created_at.strftime('%B %Y') }}</div>
+            </div>
+            <div style="margin-top:1.25rem;display:flex;flex-direction:column;gap:0.5rem;">
+                <a href="/my-bookings" class="btn btn-secondary btn-sm"><i class="fas fa-calendar"></i> My Bookings</a>
+                <a href="/wishlist" class="btn btn-secondary btn-sm"><i class="fas fa-heart"></i> Wishlist</a>
+                <a href="/logout" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </div>
+        <div>
+            <div class="edit-form">
+                <h2>Account Details</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" value="{{ user.name }}" id="prof-name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-control" value="{{ user.phone or '' }}" id="prof-phone">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" value="{{ user.email }}" disabled style="opacity:0.6;cursor:not-allowed">
+                    <small style="color:var(--text2);font-size:0.78rem;">Email cannot be changed</small>
+                </div>
+                <button class="btn btn-primary" onclick="showToast('Profile update coming soon!', 'success')"><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+
+            <div class="edit-form" style="margin-top:1.5rem;">
+                <h2>Change Password</h2>
+                <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <input type="password" class="form-control" placeholder="••••••••">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" placeholder="••••••••">
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="showToast('Password update coming soon!', 'success')"><i class="fas fa-lock"></i> Update Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

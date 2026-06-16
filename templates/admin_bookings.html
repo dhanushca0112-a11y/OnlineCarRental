@@ -1,0 +1,111 @@
+{% extends "admin_base.html" %}
+{% block title %}Bookings - Admin{% endblock %}
+{% block page_title %}All Bookings{% endblock %}
+{% block content %}
+
+<div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+    {% for label, value, color in [('All','all','secondary'),('Pending','payment_pending','warning'),('Confirmed','confirmed','success'),('Rejected','rejected','danger'),('Cancelled','cancelled','danger')] %}
+    <a href="/admin/bookings?status={{ value }}" class="btn btn-sm btn-{{ color }} {% if status_filter == value %}{% endif %}"
+       style="{% if status_filter == value %}outline:2px solid currentColor;outline-offset:2px;{% endif %}">
+        {{ label }}
+    </a>
+    {% endfor %}
+</div>
+
+<div class="table-card">
+    <div class="table-header">
+        <h3>Bookings <span style="color:var(--text2);font-weight:400;">({{ bookings_data|length }})</span></h3>
+        <input type="text" placeholder="🔍 Search..." style="padding:0.5rem 0.75rem;border-radius:8px;border:1.5px solid var(--card-border);background:var(--bg3);color:var(--text);font-size:0.8rem;outline:none;width:220px;" oninput="filterRows(this.value)">
+    </div>
+    <div class="table-wrap">
+        <table id="bookings-table">
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Customer</th>
+                    <th>Car</th>
+                    <th>Trip</th>
+                    <th>Amount</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in bookings_data %}
+                <tr>
+                    <td><code style="color:var(--accent);font-size:0.78rem">{{ item.booking.booking_id }}</code><br><span style="font-size:0.72rem;color:var(--text2)">{{ item.booking.created_at.strftime('%d %b %Y') }}</span></td>
+                    <td>
+                        <div style="font-weight:600;font-size:0.875rem">{{ item.user.name if item.user else 'N/A' }}</div>
+                        <div style="font-size:0.75rem;color:var(--text2)">{{ item.user.phone if item.user else '' }}</div>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            {% if item.car %}
+                            <img src="{{ item.car.image_url }}" class="car-thumb" onerror="this.style.display='none'">
+                            <div>
+                                <div style="font-size:0.8rem;font-weight:600">{{ item.car.name }}</div>
+                                <div style="font-size:0.72rem;color:var(--text2)">{{ item.car.category }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td style="font-size:0.8rem">
+                        <div>{{ item.booking.pickup_date.strftime('%d %b') }} → {{ item.booking.return_date.strftime('%d %b %Y') }}</div>
+                        <div style="color:var(--text2)">{{ item.booking.days }}d · {{ item.booking.pickup_location[:20] }}...</div>
+                        <div style="margin-top:3px;display:flex;gap:3px;flex-wrap:wrap;">
+                            {% if item.booking.drive_type == 'driver' %}<span class="badge badge-info" style="font-size:.62rem;">👨‍✈️ Driver</span>{% else %}<span class="badge badge-secondary" style="font-size:.62rem;">🚗 Self</span>{% endif %}
+                            {% if item.booking.gender == 'female' %}<span class="badge" style="font-size:.62rem;background:rgba(236,72,153,.15);color:#ec4899;">♀ Female</span>{% endif %}
+                            {% if item.booking.night_safety %}<span class="badge" style="font-size:.62rem;background:rgba(236,72,153,.15);color:#ec4899;">🌙 Night</span>{% endif %}
+                        </div>
+                    </td>
+                    <td style="font-weight:700;color:var(--accent)">₹{{ "{:,.0f}".format(item.booking.final_amount) }}</td>
+                    <td>
+                        {% if item.booking.payment_status == 'confirmed' %}<span class="badge badge-success">Confirmed</span>
+                        {% elif item.booking.payment_status == 'paid' %}<span class="badge badge-warning">⏳ Awaiting</span>
+                        {% elif item.booking.payment_status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+                        {% else %}<span class="badge badge-secondary">Unpaid</span>{% endif %}
+                        {% if item.booking.payment_method %}<div style="font-size:0.72rem;color:var(--text2);margin-top:2px">{{ item.booking.payment_method }}</div>{% endif %}
+                    </td>
+                    <td>
+                        {% if item.booking.status == 'confirmed' %}<span class="badge badge-success">✓ Confirmed</span>
+                        {% elif item.booking.status == 'payment_pending' %}<span class="badge badge-warning">Pending</span>
+                        {% elif item.booking.status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+                        {% elif item.booking.status == 'cancelled' %}<span class="badge badge-danger">Cancelled</span>
+                        {% else %}<span class="badge badge-secondary">{{ item.booking.status }}</span>{% endif %}
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap">
+                            {% if item.booking.payment_status == 'paid' and item.booking.status == 'payment_pending' %}
+                            <button class="btn btn-success btn-sm" onclick="confirm_pay({{ item.booking.id }})">✓ Confirm</button>
+                            <button class="btn btn-danger btn-sm" onclick="reject_pay({{ item.booking.id }})">✗ Reject</button>
+                            {% endif %}
+                            <a href="/invoice/{{ item.booking.id }}" target="_blank" class="btn btn-secondary btn-sm"><i class="fas fa-file-invoice"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterRows(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#bookings-table tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+async function confirm_pay(id) {
+    if (!confirm('Confirm payment and approve booking?')) return;
+    const d = await apiAction(`/admin/payment/confirm/${id}`);
+    if (d.success) { showToast('Booking confirmed!', 'success'); setTimeout(() => location.reload(), 1200); }
+}
+async function reject_pay(id) {
+    if (!confirm('Reject this payment?')) return;
+    const d = await apiAction(`/admin/payment/reject/${id}`);
+    if (d.success) { showToast('Payment rejected', 'error'); setTimeout(() => location.reload(), 1200); }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+{% block title %}Browse Cars — DCA Car Rentals{% endblock %}
+{% block extra_css %}
+<style>
+.cars-page { display:grid; grid-template-columns:270px 1fr; gap:2rem; padding:2.5rem 0 5rem; }
+
+/* SIDEBAR */
+.filter-sidebar {
+  background:var(--card); border:1px solid var(--card-border);
+  border-radius:20px; padding:1.5rem; height:fit-content;
+  position:sticky; top:88px; backdrop-filter:blur(12px);
+}
+.fs-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; }
+.fs-title { font-family:'Syne',sans-serif; font-weight:800; font-size:.95rem; }
+.fs-reset { font-size:.75rem; color:var(--accent); cursor:pointer; border:none; background:transparent; font-weight:600; }
+.fs-reset:hover { text-decoration:underline; }
+.filter-block { margin-bottom:1.25rem; padding-bottom:1.25rem; border-bottom:1px solid var(--card-border); }
+.filter-block:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+.fb-title { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--text2); margin-bottom:.65rem; }
+.radio-opt { display:flex; align-items:center; gap:8px; padding:5px 0; cursor:pointer; }
+.radio-opt input { accent-color:var(--accent); width:15px; height:15px; cursor:pointer; }
+.radio-opt label { font-size:.84rem; cursor:pointer; color:var(--text2); transition:color .15s; }
+.radio-opt:hover label { color:var(--text); }
+.price-slider { width:100%; accent-color:var(--accent); cursor:pointer; }
+.price-range-display { display:flex; justify-content:space-between; font-size:.76rem; color:var(--text2); margin-top:5px; }
+
+/* MAIN */
+.cars-toolbar {
+  display:flex; align-items:center; gap:.75rem;
+  flex-wrap:wrap; margin-bottom:1.5rem;
+}
+.search-wrap { position:relative; flex:1; min-width:200px; max-width:360px; }
+.search-wrap i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text2); font-size:.85rem; }
+.search-inp {
+  width:100%; padding:.65rem 1rem .65rem 2.4rem;
+  border-radius:10px; border:1.5px solid var(--card-border);
+  background:var(--bg3); color:var(--text);
+  font-size:.875rem; outline:none; transition:all .2s;
+}
+.search-inp:focus { border-color:var(--accent); background:var(--bg2); }
+.sort-select {
+  padding:.6rem .9rem; border-radius:9px;
+  border:1.5px solid var(--card-border);
+  background:var(--bg3); color:var(--text);
+  font-size:.82rem; cursor:pointer; outline:none;
+}
+.view-toggle { display:flex; border-radius:9px; overflow:hidden; border:1.5px solid var(--card-border); }
+.vt-btn { padding:.5rem .75rem; border:none; background:transparent; color:var(--text2); cursor:pointer; transition:all .2s; font-size:.85rem; }
+.vt-btn.active { background:var(--accent); color:#000; }
+.cars-count { font-size:.82rem; color:var(--text2); margin-left:auto; white-space:nowrap; }
+
+/* Cards — list mode */
+.list-mode .car-card { display:flex; flex-direction:row; }
+.list-mode .car-card-img-wrap { width:220px; flex-shrink:0; }
+.list-mode .car-card-img { height:100%; min-height:140px; }
+
+/* Active filter pills */
+.active-pills { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:1rem; }
+.a-pill {
+  display:flex; align-items:center; gap:5px;
+  padding:3px 10px; border-radius:20px;
+  background:var(--accent-dim); border:1px solid rgba(245,158,11,.25);
+  color:var(--accent); font-size:.72rem; font-weight:600;
+}
+.a-pill button { border:none; background:transparent; color:var(--accent); cursor:pointer; font-size:.8rem; line-height:1; padding:0; }
+
+/* Empty state */
+.no-cars { text-align:center; padding:4rem 2rem; color:var(--text2); grid-column:1/-1; }
+.no-cars i { font-size:3rem; margin-bottom:1rem; color:var(--text3); display:block; }
+.no-cars h3 { font-family:'Syne',sans-serif; font-size:1.3rem; color:var(--text); margin-bottom:.5rem; }
+
+@media(max-width:900px) { .cars-page { grid-template-columns:1fr; } .filter-sidebar { position:static; } }
+@media(max-width:600px) { .list-mode .car-card { flex-direction:column; } .list-mode .car-card-img-wrap { width:100%; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="eyebrow"><i class="fas fa-car"></i> Browse Fleet</div>
+    <h1>Find Your <span style="color:var(--accent)">Perfect Car</span></h1>
+    <p>{{ cars|length }} vehicles available across India</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="cars-page">
+
+    <!-- ══ FILTER SIDEBAR ══ -->
+    <aside class="filter-sidebar">
+      <div class="fs-header">
+        <div class="fs-title"><i class="fas fa-sliders-h" style="color:var(--accent);margin-right:6px;"></i>Filters</div>
+        <button class="fs-reset" onclick="clearAll()">Clear All</button>
+      </div>
+
+      <div class="filter-block">
+        <div class="fb-title">Availability</div>
+        <label class="radio-opt">
+          <input type="checkbox" id="avail-only" onchange="applyFilters()">
+          <label for="avail-only">Available Only</label>
+        </label>
+      </div>
+
+      <div class="filter-block">
+        <div class="fb-title">Category</div>
+        {% for cat in ['all','SUV','Hatchback','Sedan','MPV','Luxury'] %}
+        <label class="radio-opt">
+          <input type="radio" name="cat" value="{{ cat }}" {% if cat=='all' %}checked{% endif %} onchange="applyFilters()">
+          <label>{{ 'All Categories' if cat=='all' else cat }}</label>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="filter-block">
+        <div class="fb-title">Fuel Type</div>
+        {% for f in ['all','Petrol','Diesel','Electric','CNG'] %}
+        <label class="radio-opt">
+          <input type="radio" name="fuel" value="{{ f }}" {% if f=='all' %}checked{% endif %} onchange="applyFilters()">
+          <label>{{ 'All Fuels' if f=='all' else f }}</label>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="filter-block">
+        <div class="fb-title">Transmission</div>
+        {% for t in ['all','Manual','Automatic'] %}
+        <label class="radio-opt">
+          <input type="radio" name="trans" value="{{ t }}" {% if t=='all' %}checked{% endif %} onchange="applyFilters()">
+          <label>{{ 'All' if t=='all' else t }}</label>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="filter-block">
+        <div class="fb-title">Price Per Day (₹)</div>
+        <input type="range" class="price-slider" id="max-price" min="500" max="8000" value="8000" step="100" oninput="updatePrice(this.value);applyFilters()">
+        <div class="price-range-display"><span>₹500</span><span id="price-disp" style="color:var(--accent);font-weight:600;">₹8,000</span></div>
+      </div>
+
+      <div class="filter-block">
+        <div class="fb-title">Minimum Seats</div>
+        <select class="form-control" id="seats" onchange="applyFilters()" style="font-size:.82rem;padding:.55rem .85rem;">
+          <option value="">Any</option>
+          <option value="4">4+ seats</option>
+          <option value="5">5+ seats</option>
+          <option value="7">7+ seats</option>
+        </select>
+      </div>
+
+      <div class="filter-block" style="border-bottom:none;margin-bottom:0;padding-bottom:0;">
+        <div class="fb-title">Ride Mode</div>
+        {% for m in ['all','self','driver'] %}
+        <label class="radio-opt">
+          <input type="radio" name="mode-filter" value="{{ m }}" {% if m=='all' %}checked{% endif %} onchange="applyFilters()">
+          <label>{{ {'all':'All','self':'Self Drive','driver':'With Driver'}[m] }}</label>
+        </label>
+        {% endfor %}
+      </div>
+    </aside>
+
+    <!-- ══ MAIN AREA ══ -->
+    <div>
+      <!-- Toolbar -->
+      <div class="cars-toolbar">
+        <div class="search-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" class="search-inp" id="search-inp" placeholder="Search cars…" oninput="applyFilters()">
+        </div>
+        <select class="sort-select" id="sort-sel" onchange="applyFilters()">
+          <option value="default">Sort: Default</option>
+          <option value="price-asc">Price ↑ Low–High</option>
+          <option value="price-desc">Price ↓ High–Low</option>
+          <option value="rating">Top Rated</option>
+          <option value="name">Name A–Z</option>
+        </select>
+        <div class="view-toggle">
+          <button class="vt-btn active" id="vt-grid" onclick="setView('grid')" title="Grid"><i class="fas fa-th-large"></i></button>
+          <button class="vt-btn" id="vt-list" onclick="setView('list')" title="List"><i class="fas fa-list"></i></button>
+        </div>
+        <div class="cars-count" id="cars-count">Loading…</div>
+      </div>
+
+      <!-- Active pills -->
+      <div class="active-pills" id="active-pills"></div>
+
+      <!-- Grid -->
+      <div class="cars-grid" id="cars-grid">
+        <div style="grid-column:1/-1;text-align:center;padding:2rem;"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALL_CARS = {{ cars|tojson }};
+const WL_IDS   = {{ wishlist_ids|tojson }};
+const LOGGED_IN = {{ 'true' if session.user_id else 'false' }};
+let wishlistIds = [...WL_IDS];
+let currentView = 'grid';
+
+/* ── Render ── */
+function renderCars(list) {
+  const grid = document.getElementById('cars-grid');
+  document.getElementById('cars-count').textContent = `${list.length} car${list.length!==1?'s':''} found`;
+  if (!list.length) {
+    grid.innerHTML = `<div class="no-cars"><i class="fas fa-car-crash"></i><h3>No Cars Found</h3><p>Try adjusting your filters or <button onclick="clearAll()" style="border:none;background:transparent;color:var(--accent);cursor:pointer;font-weight:600;">clear all</button></p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(car => {
+    const inWL = wishlistIds.includes(car.id);
+    return `
+    <div class="car-card" data-cat="${car.category}">
+      <div class="car-card-img-wrap">
+        <img src="${car.image_url}" alt="${car.name}" class="car-card-img"
+             onerror="this.src='https://via.placeholder.com/400x210/0a0e18/f59e0b?text=${encodeURIComponent(car.name)}'">
+        <div class="car-badge${!car.is_available?' unavail':''}">${car.is_available?car.category:'Unavailable'}</div>
+        ${LOGGED_IN?`<button class="car-wishlist${inWL?' active':''}" onclick="toggleWL(${car.id},this)"><i class="fas fa-heart"></i></button>`:''}
+      </div>
+      <div class="car-card-body">
+        <div class="car-name">${car.name}</div>
+        <div class="car-brand">${car.brand} · ${car.model_year}</div>
+        <div class="car-specs">
+          <div class="car-spec"><i class="fas fa-users"></i> ${car.seats} Seats</div>
+          <div class="car-spec"><i class="fas fa-gas-pump"></i> ${car.fuel_type}</div>
+          <div class="car-spec"><i class="fas fa-cog"></i> ${car.transmission}</div>
+          <div class="car-spec"><i class="fas fa-road"></i> ₹${car.price_per_km}/km</div>
+        </div>
+        <div class="car-price">
+          <div>
+            <div class="car-price-amount">₹${car.price_per_day.toLocaleString('en-IN')}</div>
+            <div class="car-price-per">per day + GST</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+            <div class="car-rating"><i class="fas fa-star"></i>${car.avg_rating>0?car.avg_rating+' ('+car.review_count+')':'New'}</div>
+            <a href="/car/${car.id}" class="btn btn-primary btn-sm">${car.is_available?'Book Now':'Details'}</a>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Filters ── */
+function applyFilters() {
+  const search = document.getElementById('search-inp').value.toLowerCase();
+  const cat    = document.querySelector('input[name="cat"]:checked')?.value||'all';
+  const fuel   = document.querySelector('input[name="fuel"]:checked')?.value||'all';
+  const trans  = document.querySelector('input[name="trans"]:checked')?.value||'all';
+  const maxP   = parseInt(document.getElementById('max-price').value);
+  const seats  = document.getElementById('seats').value;
+  const avail  = document.getElementById('avail-only').checked;
+  const sort   = document.getElementById('sort-sel').value;
+
+  let list = ALL_CARS.filter(c => {
+    if (search && !c.name.toLowerCase().includes(search) && !c.brand.toLowerCase().includes(search)) return false;
+    if (cat!=='all' && c.category!==cat) return false;
+    if (fuel!=='all' && c.fuel_type!==fuel) return false;
+    if (trans!=='all' && c.transmission!==trans) return false;
+    if (c.price_per_day > maxP) return false;
+    if (seats && c.seats < parseInt(seats)) return false;
+    if (avail && !c.is_available) return false;
+    return true;
+  });
+
+  if (sort==='price-asc')  list.sort((a,b)=>a.price_per_day-b.price_per_day);
+  if (sort==='price-desc') list.sort((a,b)=>b.price_per_day-a.price_per_day);
+  if (sort==='rating')     list.sort((a,b)=>b.avg_rating-a.avg_rating);
+  if (sort==='name')       list.sort((a,b)=>a.name.localeCompare(b.name));
+
+  renderCars(list);
+  updateActivePills({cat,fuel,trans,avail,maxP,search});
+}
+
+function updateActivePills({cat,fuel,trans,avail,maxP,search}) {
+  const pills = [];
+  if (cat!=='all') pills.push([cat, ()=>{ document.querySelector('input[name="cat"][value="all"]').checked=true; applyFilters(); }]);
+  if (fuel!=='all') pills.push([fuel, ()=>{ document.querySelector('input[name="fuel"][value="all"]').checked=true; applyFilters(); }]);
+  if (trans!=='all') pills.push([trans, ()=>{ document.querySelector('input[name="trans"][value="all"]').checked=true; applyFilters(); }]);
+  if (avail) pills.push(['Available Only', ()=>{ document.getElementById('avail-only').checked=false; applyFilters(); }]);
+  if (maxP < 8000) pills.push([`≤₹${maxP.toLocaleString('en-IN')}`, ()=>{ document.getElementById('max-price').value=8000; updatePrice(8000); applyFilters(); }]);
+  if (search) pills.push([`"${search}"`, ()=>{ document.getElementById('search-inp').value=''; applyFilters(); }]);
+  const container = document.getElementById('active-pills');
+  container.innerHTML = pills.map(([lbl,_],i) =>
+    `<div class="a-pill">${lbl}<button onclick="removePill(${i})">×</button></div>`
+  ).join('');
+  // Store callbacks
+  container._callbacks = pills.map(([_,fn])=>fn);
+}
+function removePill(i) {
+  const cbs = document.getElementById('active-pills')._callbacks;
+  if (cbs && cbs[i]) cbs[i]();
+}
+
+function clearAll() {
+  document.getElementById('search-inp').value='';
+  document.querySelector('input[name="cat"][value="all"]').checked=true;
+  document.querySelector('input[name="fuel"][value="all"]').checked=true;
+  document.querySelector('input[name="trans"][value="all"]').checked=true;
+  document.getElementById('avail-only').checked=false;
+  document.getElementById('max-price').value=8000; updatePrice(8000);
+  document.getElementById('seats').value='';
+  document.querySelector('input[name="mode-filter"][value="all"]').checked=true;
+  document.getElementById('sort-sel').value='default';
+  renderCars(ALL_CARS);
+  document.getElementById('active-pills').innerHTML='';
+  document.getElementById('cars-count').textContent=`${ALL_CARS.length} cars found`;
+}
+
+function updatePrice(v) {
+  document.getElementById('price-disp').textContent='₹'+parseInt(v).toLocaleString('en-IN');
+}
+
+function setView(v) {
+  currentView=v;
+  document.getElementById('cars-grid').className='cars-grid'+(v==='list'?' list-mode':'');
+  document.getElementById('vt-grid').classList.toggle('active',v==='grid');
+  document.getElementById('vt-list').classList.toggle('active',v==='list');
+}
+
+async function toggleWL(carId, btn) {
+  const res = await fetch(`/wishlist/toggle/${carId}`,{method:'POST'});
+  const data = await res.json();
+  if(data.success){
+    btn.classList.toggle('active',data.action==='added');
+    if(data.action==='added') wishlistIds.push(carId);
+    else wishlistIds=wishlistIds.filter(id=>id!==carId);
+    showToast(data.action==='added'?'❤️ Added to wishlist':'Removed from wishlist','success');
+  }
+}
+
+// Init
+applyFilters();
+</script>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}Book {{ car.name }} - DCA Car Rentals{% endblock %}
+{% block content %}
+<!-- This route now handles booking via car_detail.html POST, but keeps GET for direct access -->
+<script>window.location.href = '/car/{{ car.id }}';</script>
+{% endblock %}

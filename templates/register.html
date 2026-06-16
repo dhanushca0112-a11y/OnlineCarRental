@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Register - DCA Car Rentals{% endblock %}
+{% block content %}
+<style>
+.auth-wrap { min-height: calc(100vh - 68px); display: flex; align-items: center; justify-content: center; padding: 2rem; background: radial-gradient(ellipse at 50% 50%, rgba(245,158,11,0.05) 0%, transparent 70%); }
+.auth-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 24px; padding: 2.5rem; width: 100%; max-width: 480px; backdrop-filter: blur(20px); box-shadow: var(--shadow); }
+.auth-logo { text-align: center; margin-bottom: 2rem; }
+.auth-logo h1 { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.strength-bar { height: 4px; border-radius: 2px; background: var(--card-border); margin-top: 6px; overflow: hidden; }
+.strength-fill { height: 100%; border-radius: 2px; transition: all 0.3s; width: 0; }
+</style>
+<div class="auth-wrap">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <h1><i class="fas fa-car"></i> DCA Car Rentals</h1>
+            <p>Create your free account</p>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="name" placeholder="Rahul Sharma">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" class="form-control" id="phone" placeholder="9876543210">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" placeholder="rahul@example.com">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" placeholder="Min. 8 characters" oninput="checkStrength(this.value)">
+            <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:0.5rem;" onclick="doRegister()" id="reg-btn">
+            <i class="fas fa-user-plus"></i> Create Account
+        </button>
+        <div style="text-align:center;font-size:0.875rem;color:var(--text2);margin-top:1.25rem;">
+            Already have an account? <a href="/login" style="color:var(--accent);font-weight:600;">Sign In</a>
+        </div>
+    </div>
+</div>
+<script>
+function checkStrength(pw) {
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    const fill = document.getElementById('strength-fill');
+    const colors = ['#ef4444','#f59e0b','#3b82f6','#10b981'];
+    fill.style.width = (score * 25) + '%';
+    fill.style.background = colors[score-1] || '#ef4444';
+}
+async function doRegister() {
+    const btn = document.getElementById('reg-btn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
+    const form = new FormData();
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    form.append('phone', document.getElementById('phone').value);
+    form.append('password', document.getElementById('password').value);
+    const res = await fetch('/register', { method: 'POST', body: form });
+    const data = await res.json();
+    if (data.success) { showToast('Account created!', 'success'); setTimeout(() => window.location.href = '/cars', 1000); }
+    else { showToast(data.message, 'error'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account'; }
+}
+</script>
+{% endblock %}

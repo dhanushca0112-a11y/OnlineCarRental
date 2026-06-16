@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy - DCA Car Rentals{% endblock %}
+{% block content %}
+<style>
+.legal-wrap{max-width:860px;margin:0 auto;padding:0 1.5rem 5rem}
+.legal-card{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:2.5rem;margin-bottom:1.25rem;transition:all .3s}
+.legal-card:hover{border-color:rgba(245,158,11,.2)}
+.legal-card h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:1rem;display:flex;align-items:center;gap:10px}
+.legal-card h2 i{width:20px;text-align:center}
+.legal-card p,.legal-card li{font-size:.9rem;color:var(--text2);line-height:1.8;margin-bottom:.6rem}
+.legal-card ul,.legal-card ol{padding-left:1.25rem}
+.legal-card li{margin-bottom:.4rem}
+.highlight-box{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:1rem;margin:.75rem 0;font-size:.875rem;color:var(--text2)}
+.data-table{width:100%;border-collapse:collapse;margin:.75rem 0;font-size:.85rem}
+.data-table th{background:var(--bg3);padding:.65rem 1rem;text-align:left;color:var(--text2);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px}
+.data-table td{padding:.65rem 1rem;border-bottom:1px solid var(--card-border);color:var(--text2)}
+.data-table tr:last-child td{border-bottom:none}
+</style>
+
+<div class="page-header">
+  <div class="container">
+    <div class="eyebrow"><i class="fas fa-shield-alt"></i> Legal</div>
+    <h1>Privacy <span style="color:var(--accent)">Policy</span></h1>
+    <p>Last updated: January 2026 &nbsp;·&nbsp; We respect your privacy completely.</p>
+  </div>
+</div>
+
+<div class="legal-wrap" style="padding-top:2.5rem;">
+
+  <div class="legal-card" style="background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.2);">
+    <h2><i class="fas fa-info-circle"></i> Privacy at a Glance</h2>
+    <p>DCA Car Rentals (operated by Dhanush) is committed to protecting your personal information. This policy explains what data we collect, how we use it, and your rights as a user.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1rem;">
+      <div style="text-align:center;padding:.75rem;background:var(--bg3);border-radius:12px;">
+        <i class="fas fa-ban" style="color:var(--green);font-size:1.3rem;margin-bottom:.35rem;display:block;"></i>
+        <div style="font-size:.8rem;font-weight:600;">No Data Selling</div>
+        <div style="font-size:.72rem;color:var(--text2);">We never sell your data</div>
+      </div>
+      <div style="text-align:center;padding:.75rem;background:var(--bg3);border-radius:12px;">
+        <i class="fas fa-lock" style="color:var(--blue);font-size:1.3rem;margin-bottom:.35rem;display:block;"></i>
+        <div style="font-size:.8rem;font-weight:600;">Encrypted Storage</div>
+        <div style="font-size:.72rem;color:var(--text2);">All data is encrypted</div>
+      </div>
+      <div style="text-align:center;padding:.75rem;background:var(--bg3);border-radius:12px;">
+        <i class="fas fa-user-shield" style="color:var(--purple);font-size:1.3rem;margin-bottom:.35rem;display:block;"></i>
+        <div style="font-size:.8rem;font-weight:600;">Your Rights</div>
+        <div style="font-size:.72rem;color:var(--text2);">Delete anytime</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legal-card">
+    <h2><i class="fas fa-database"></i> 1. Information We Collect</h2>
+    <p>We collect the following types of information when you use DCA Car Rentals:</p>
+    <table class="data-table">
+      <thead><tr><th>Data Type</th><th>What We Collect</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Account Info</strong></td><td>Name, email, phone number</td><td>Account creation & communication</td></tr>
+        <tr><td><strong>Booking Data</strong></td><td>Dates, locations, vehicle choice, drive type, gender</td><td>Booking processing & fulfilment</td></tr>
+        <tr><td><strong>Payment Info</strong></td><td>UPI transaction ID / UTR (not card details)</td><td>Payment verification</td></tr>
+        <tr><td><strong>Location Data</strong></td><td>Pickup & drop coordinates (only when entered)</td><td>Route calculation & safety</td></tr>
+        <tr><td><strong>Usage Data</strong></td><td>Pages visited, clicks, session duration</td><td>Service improvement</td></tr>
+        <tr><td><strong>Safety Data</strong></td><td>Selected safety features, emergency contacts (female users)</td><td>Women's safety services</td></tr>
+        <tr><td><strong>Reviews</strong></td><td>Your ratings and comments</td><td>Fleet quality improvement</td></tr>
+      </tbody>
+    </table>
+    <div class="highlight-box"><i class="fas fa-credit-card" style="color:var(--accent)"></i> <strong>Important:</strong> We do NOT store your debit/credit card numbers, CVV, or full UPI PIN. Payment is processed directly through secure UPI channels.</div>
+  </div>
+
+  <div class="legal-card">
+    <h2><i class="fas fa-cogs"></i> 2. How We Use Your Information</h2>
+    <ul>
+      <li>To process and confirm your car rental bookings.</li>
+      <li>To verify payments and maintain billing records.</li>
+      <li>To send booking confirmations, receipts, and important service updates via email/SMS.</li>
+      <li>To provide 24/7 roadside assistance and emergency support.</li>
+      <li>To operate women's safety features including SOS alerts and live GPS tracking.</li>
+      <li>To improve our website, app, and services based on usage patterns.</li>
+      <li>To comply with Indian legal and regulatory requirements.</li>
+      <li>To send occasional promotional offers (only if you opt in).</li>
+    </ul>
+    <p>We do <strong>not</strong> use your data for automated profiling or sell it to any third party for marketing purposes.</p>
+  </div>
+
+  <div class="legal-card">
+    <h2><i class="fas fa-share-alt"></i> 3. Information Sharing</h2>
+    <p>We share your information only in the following limited circumstances:</p>
+    <ul>
+      <li><strong>Assigned Drivers:</strong> Your name and phone number are shared with the driver for "With Driver" bookings.</li>
+      <li><strong>Emergency Services:</strong> In a safety emergency, your location and name may be shared with police or medical services.</li>
+      <li><strong>Legal Compliance:</strong> We may disclose information if required by Indian law, court order, or government authority.</li>
+      <li><strong>Safety Contacts:</strong> Your live location is shared with contacts you personally nominate in the safety feature.</li>
+    </ul>
+    <p>We do <strong>not</strong> share your information with advertisers, data brokers, or marketing companies.</p>
+  </div>
+
+  <div class="legal-card">
+    <h2><i class="fas fa-cookie-bite"></i> 4. Cookies &amp; Tracking</h2>
+    <p>DCA Car Rentals uses minimal, essential cookies only:</p>
+    <ul>
+      <li><strong>Session cookies:</strong> Keep you logged in during your visit. Deleted when you close the browser.</li>
+      <li><strong>Preference cookies:</strong> Remember your dark/light mode choice. Stored in localStorage.</li>
+      <li><strong>No advertising or tracking cookies</strong> are used by DCA Car Rentals.</li>
+    </ul>
+    <p>We do not use Google Analytics, Facebook Pixel, or any third-party tracking scripts.</p>
+  </div>
+
+  <div class="legal-card">
+    <h2><i class="fas fa-lock"></i> 5. Data Security</h2>
+    <ul>
+      <li>All passwords are hashed using industry-standard algorithms (Werkzeug/bcrypt). We cannot see your password.</li>
+      <li>Data is stored in an encrypted SQLite database on secured servers.</li>
+      <li>All web traffic is encrypted via HTTPS/SSL.</li>
+      <li>Access to customer data is restricted to Dhanush and authorised DCA staff only.</li>
+      <li>Regular security audits are conducted to identify and fix vulnerabilities.</li>
+    </ul>
+    <p>While we implement robust security measures, no system is 100% immune. In case of a data breach, we will notify affected users within 72 hours.</p>
+  </div>
+
+  <div class="legal-card">
+    <h2><i class="fas fa-user-cog"></i> 6. Your Rights (Indian IT Act &amp; DPDP Act)</h2>
+    <p>Under Indian data protection laws, you have the right to:</p>
+    <ul>
+      <li><strong>Access:</strong> Request a copy of all personal data we hold about you.</li>
+      <li><strong>Correction:</strong> Request correction of inaccurate or incomplete data.</li>
+      <li><strong>Deletion:</strong> Request deletion of your account and all associated data.</li>
+      <li><strong>Portability:</strong> Request your data in a machine-readable format (CSV/JSON).</li>
+      <li><strong>Objection:</strong> Object to processing of your data for marketing purposes.</li>
+      <li><strong>Withdrawal:</strong> Withdraw consent for optional data processing at any time.</li>
+    </ul>
+    <p>To exercise any of these rights, contact Dhanush at <a href="mailto:dhanush@dcacarrentals.com" style="color:var(--accent)">dhanush@dcacarrentals.com</a> or call <a href="tel:+916362948259" style="color:var(--accent)">+91 6362948259</a>. Requests will be processed within 30 days.</p>
+  </div>
+
+  <div class="legal-card">
+    <h2><i class="fas fa-child"></i> 7. Children's Privacy</h2>
+    <p>DCA Car Rentals services are intended for users 18 years and older. We do not knowingly collect personal information from anyone under 18. If we become aware that a child under 18 has provided personal information, we will delete it immediately. Contact us at +91 6362948259 if you believe we have inadvertently collected such information.</p>
+  </div>
+
+  <div class="legal-card">
+    <h2><i class="fas fa-calendar-alt"></i> 8. Data Retention</h2>
+    <ul>
+      <li>Account data: Retained as long as your account is active.</li>
+      <li>Booking records: Retained for 3 years for legal and tax compliance.</li>
+      <li>Deleted accounts: Data anonymised within 30 days of deletion request.</li>
+      <li>Safety dashcam recordings: Deleted after 72 hours unless an incident is reported.</li>
+    </ul>
+  </div>
+
+  <div class="legal-card">
+    <h2><i class="fas fa-envelope"></i> 9. Contact &amp; Grievances</h2>
+    <p>For any privacy-related concerns, questions, or requests, contact our Privacy Officer:</p>
+    <div class="highlight-box" style="margin-top:.75rem;">
+      <strong>Dhanush — Privacy Officer</strong><br>
+      DCA Car Rentals, Karnataka, India<br>
+      📞 <a href="tel:+916362948259" style="color:var(--accent)">+91 6362948259</a><br>
+      ✉️ <a href="mailto:dhanush@dcacarrentals.com" style="color:var(--accent)">dhanush@dcacarrentals.com</a><br>
+      <br>
+      Response time: Within 48 hours for privacy requests, within 30 days for data deletion.
+    </div>
+    <p>If you are unsatisfied with our response, you may escalate to the Data Protection Board of India (once established under the DPDP Act 2023).</p>
+  </div>
+
+</div>
+{% endblock %}

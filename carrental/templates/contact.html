@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Contact Us - DCA Car Rentals{% endblock %}
+{% block content %}
+<style>
+.contact-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:3rem;padding:3rem 0 5rem}
+.contact-info-card{background:linear-gradient(135deg,rgba(245,158,11,.08) 0%,rgba(139,92,246,.06) 100%);border:1px solid rgba(245,158,11,.2);border-radius:24px;padding:2.5rem;height:fit-content}
+.contact-item{display:flex;align-items:flex-start;gap:1rem;padding:1.25rem 0;border-bottom:1px solid var(--card-border)}
+.contact-item:last-child{border-bottom:none}
+.c-icon{width:46px;height:46px;border-radius:12px;background:var(--accent-dim);border:1px solid rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--accent);flex-shrink:0}
+.c-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);font-weight:600;margin-bottom:2px}
+.c-value{font-weight:700;font-size:.95rem}
+.c-sub{font-size:.8rem;color:var(--text2);margin-top:2px}
+.hours-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1rem}
+.hour-item{background:var(--bg3);border-radius:10px;padding:.65rem .9rem;font-size:.8rem}
+.hour-day{color:var(--text2);margin-bottom:2px}
+.hour-time{font-weight:600;color:var(--accent)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.form-card{background:var(--card);border:1px solid var(--card-border);border-radius:24px;padding:2.5rem;backdrop-filter:blur(12px)}
+.form-section-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:.4rem}
+.map-embed{border-radius:16px;overflow:hidden;border:1px solid var(--card-border);height:220px;margin-top:1.5rem}
+.map-embed iframe{width:100%;height:100%;border:none}
+@media(max-width:900px){.contact-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="page-header">
+  <div class="container">
+    <div class="eyebrow"><i class="fas fa-phone"></i> Get In Touch</div>
+    <h1>Contact <span style="color:var(--accent)">DCA Car Rentals</span></h1>
+    <p>We're here to help — reach Dhanush directly for bookings, support, or any query.</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="contact-grid">
+
+    <!-- LEFT: Contact Info -->
+    <div>
+      <div class="contact-info-card">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:8px;">
+          <div style="width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite"></div>
+          We're Online Now
+        </div>
+
+        <div class="contact-item">
+          <div class="c-icon"><i class="fas fa-user"></i></div>
+          <div>
+            <div class="c-label">Founder / Contact Person</div>
+            <div class="c-value">Dhanush</div>
+            <div class="c-sub">DCA Car Rentals — Founder & CEO</div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="c-icon"><i class="fas fa-phone"></i></div>
+          <div>
+            <div class="c-label">Phone / WhatsApp</div>
+            <div class="c-value"><a href="tel:+916362948259" style="color:var(--accent)">+91 6362948259</a></div>
+            <div class="c-sub">Available Mon–Sat, 8 AM – 9 PM IST</div>
+            <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+              <a href="tel:+916362948259" class="btn btn-primary btn-sm"><i class="fas fa-phone"></i> Call Now</a>
+              <a href="https://wa.me/916362948259" target="_blank" class="btn btn-success btn-sm"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="c-icon"><i class="fas fa-envelope"></i></div>
+          <div>
+            <div class="c-label">Email</div>
+            <div class="c-value"><a href="mailto:dhanush@dcacarrentals.com" style="color:var(--accent)">dhanush@dcacarrentals.com</a></div>
+            <div class="c-sub">Reply within 24 hours guaranteed</div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="c-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div>
+            <div class="c-label">Location</div>
+            <div class="c-value">Karnataka, India</div>
+            <div class="c-sub">Serving 25+ cities across India</div>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="c-icon"><i class="fas fa-headset"></i></div>
+          <div>
+            <div class="c-label">Emergency / Roadside</div>
+            <div class="c-value"><a href="tel:+916362948259" style="color:var(--red)">+91 6362948259</a></div>
+            <div class="c-sub">24/7 roadside assistance for active bookings</div>
+          </div>
+        </div>
+
+        <!-- Business Hours -->
+        <div style="margin-top:1.25rem;">
+          <div style="font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:.75rem;">Business Hours</div>
+          <div class="hours-grid">
+            <div class="hour-item"><div class="hour-day">Mon – Fri</div><div class="hour-time">8:00 AM – 9:00 PM</div></div>
+            <div class="hour-item"><div class="hour-day">Saturday</div><div class="hour-time">9:00 AM – 7:00 PM</div></div>
+            <div class="hour-item"><div class="hour-day">Sunday</div><div class="hour-time">10:00 AM – 5:00 PM</div></div>
+            <div class="hour-item"><div class="hour-day">Emergency</div><div class="hour-time" style="color:var(--green)">24 × 7</div></div>
+          </div>
+        </div>
+
+        <!-- Social -->
+        <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--card-border);">
+          <div style="font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:.75rem;">Follow Us</div>
+          <div style="display:flex;gap:.5rem;">
+            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            <a href="https://wa.me/916362948259" target="_blank" class="social-link"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map placeholder -->
+      <div class="map-embed" style="margin-top:1.5rem;">
+        <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=74.0,12.0,78.0,15.5&amp;layer=mapnik" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+
+    <!-- RIGHT: Contact Form -->
+    <div class="form-card">
+      <div class="form-section-title">Send Us a Message</div>
+      <p style="color:var(--text2);font-size:.875rem;margin-bottom:2rem;">Fill out the form below and Dhanush will personally get back to you within 24 hours.</p>
+
+      <div id="form-success" style="display:none;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:14px;padding:1.25rem;margin-bottom:1.5rem;text-align:center;">
+        <i class="fas fa-check-circle" style="font-size:2rem;color:var(--green);display:block;margin-bottom:.5rem;"></i>
+        <div style="font-weight:700;font-size:1rem;color:var(--green);">Message Sent!</div>
+        <div style="font-size:.875rem;color:var(--text2);margin-top:.25rem;">Dhanush will reply within 24 hours. You can also reach him directly at <a href="tel:+916362948259" style="color:var(--accent)">+91 6362948259</a>.</div>
+      </div>
+
+      <div id="contact-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Your Name *</label>
+            <input type="text" class="form-control" id="cf-name" placeholder="Rahul Sharma" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" id="cf-phone" placeholder="+91 98765 43210">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" class="form-control" id="cf-email" placeholder="rahul@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <select class="form-control" id="cf-subject">
+            <option value="Booking Inquiry">Booking Inquiry</option>
+            <option value="Payment Issue">Payment Issue</option>
+            <option value="Cancellation Request">Cancellation Request</option>
+            <option value="Fleet Information">Fleet / Car Information</option>
+            <option value="Corporate Rental">Corporate Rental</option>
+            <option value="Safety Concern">Safety Concern</option>
+            <option value="Feedback">Feedback / Suggestion</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message *</label>
+          <textarea class="form-control" id="cf-message" rows="5" placeholder="Tell us how we can help you..."></textarea>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-lg" onclick="submitContact()" id="cf-btn" style="flex:1;justify-content:center;">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+          <a href="https://wa.me/916362948259" target="_blank" class="btn btn-success btn-lg" style="flex:1;justify-content:center;">
+            <i class="fab fa-whatsapp"></i> WhatsApp Instead
+          </a>
+        </div>
+        <p style="font-size:.75rem;color:var(--text2);margin-top:1rem;text-align:center;">
+          <i class="fas fa-lock" style="color:var(--green)"></i> Your information is secure and never shared with third parties.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Links Banner -->
+<section style="background:var(--bg2);border-top:1px solid var(--card-border);padding:2.5rem 0;margin-top:2rem;">
+  <div class="container" style="text-align:center;">
+    <p style="color:var(--text2);margin-bottom:1.25rem;font-size:.9rem;">Need help with something specific?</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="/cars" class="btn btn-secondary"><i class="fas fa-car"></i> Browse Cars</a>
+      <a href="/my-bookings" class="btn btn-secondary"><i class="fas fa-calendar"></i> My Bookings</a>
+      <a href="/about#faq" class="btn btn-secondary"><i class="fas fa-question-circle"></i> FAQs</a>
+      <a href="/terms" class="btn btn-secondary"><i class="fas fa-file-contract"></i> Terms</a>
+    </div>
+  </div>
+</section>
+
+<script>
+async function submitContact() {
+  const name = document.getElementById('cf-name').value.trim();
+  const email = document.getElementById('cf-email').value.trim();
+  const msg = document.getElementById('cf-message').value.trim();
+  if (!name || !email || !msg) { showToast('Please fill all required fields', 'error'); return; }
+
+  const btn = document.getElementById('cf-btn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+  await new Promise(r => setTimeout(r, 1200)); // simulate network
+
+  const res = await fetch('/api/contact', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      name, email,
+      phone: document.getElementById('cf-phone').value,
+      subject: document.getElementById('cf-subject').value,
+      message: msg
+    })
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('contact-form').style.display = 'none';
+    document.getElementById('form-success').style.display = 'block';
+  } else {
+    showToast('Failed to send. Call us directly.', 'error');
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+  }
+}
+</script>
+{% endblock %}

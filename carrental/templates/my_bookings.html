@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}My Bookings - DCA Car Rentals{% endblock %}
+{% block content %}
+<style>
+.booking-item {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 20px; padding: 1.5rem; margin-bottom: 1.25rem;
+    display: grid; grid-template-columns: 100px 1fr auto;
+    gap: 1.25rem; align-items: center;
+    transition: all 0.3s;
+}
+.booking-item:hover { border-color: rgba(245,158,11,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.booking-item img { width: 100px; height: 72px; object-fit: cover; border-radius: 12px; }
+.booking-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
+.booking-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; }
+.booking-meta-item { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; color: var(--text2); }
+.booking-meta-item i { color: var(--accent); font-size: 0.75rem; }
+.booking-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+.booking-amount { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--accent); }
+.tab-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab-btn {
+    padding: 0.5rem 1.25rem; border-radius: 20px; border: 1.5px solid var(--card-border);
+    background: transparent; color: var(--text2); cursor: pointer; font-size: 0.875rem; font-weight: 500;
+    transition: all 0.2s;
+}
+.tab-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 700; }
+.tab-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+@media (max-width: 600px) { .booking-item { grid-template-columns: 1fr; } .booking-item img { width: 100%; height: 160px; } .booking-actions { flex-direction: row; align-items: center; } }
+</style>
+
+<div class="page-header">
+    <div class="container">
+        <h1>My <span style="color:var(--accent)">Bookings</span></h1>
+        <p>Track and manage all your car rentals</p>
+    </div>
+</div>
+
+<div class="container" style="padding-top:2rem;padding-bottom:4rem;">
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="filterBookings('all', this)">All</button>
+        <button class="tab-btn" onclick="filterBookings('payment_pending', this)">Pending</button>
+        <button class="tab-btn" onclick="filterBookings('confirmed', this)">Confirmed</button>
+        <button class="tab-btn" onclick="filterBookings('completed', this)">Completed</button>
+        <button class="tab-btn" onclick="filterBookings('cancelled', this)">Cancelled</button>
+        <button class="tab-btn" onclick="filterBookings('rejected', this)">Rejected</button>
+    </div>
+
+    {% if bookings_data %}
+    <div id="bookings-list">
+        {% for item in bookings_data %}
+        <div class="booking-item" data-status="{{ item.booking.status }}">
+            <img src="{{ item.car.image_url }}" alt="{{ item.car.name }}"
+                 onerror="this.src='https://via.placeholder.com/100x72/1a1a2e/f59e0b?text=Car'">
+            <div>
+                <div class="booking-name">{{ item.car.name }}</div>
+                <div style="font-size:0.8rem;color:var(--text2);">{{ item.car.brand }} · Booking #{{ item.booking.booking_id }}</div>
+                <div class="booking-meta">
+                    <div class="booking-meta-item"><i class="fas fa-calendar"></i> {{ item.booking.pickup_date.strftime('%d %b %Y') }} → {{ item.booking.return_date.strftime('%d %b %Y') }}</div>
+                    <div class="booking-meta-item"><i class="fas fa-clock"></i> {{ item.booking.days }} day{{ 's' if item.booking.days > 1 else '' }}</div>
+                    <div class="booking-meta-item"><i class="fas fa-map-marker-alt"></i> {{ item.booking.pickup_location }}</div>
+                </div>
+                <div style="margin-top:0.5rem;">
+                    {% if item.booking.status == 'confirmed' %}
+                        <span class="badge badge-success">✓ Confirmed</span>
+                    {% elif item.booking.status == 'payment_pending' %}
+                        <span class="badge badge-warning">⏳ Payment Pending</span>
+                    {% elif item.booking.status == 'rejected' %}
+                        <span class="badge badge-danger">✗ Rejected</span>
+                    {% elif item.booking.status == 'cancelled' %}
+                        <span class="badge badge-danger">✗ Cancelled</span>
+                    {% elif item.booking.status == 'completed' %}
+                        <span class="badge badge-info">✓ Completed</span>
+                    {% else %}
+                        <span class="badge badge-secondary">{{ item.booking.status }}</span>
+                    {% endif %}
+                    {% if item.booking.payment_status == 'paid' and item.booking.status == 'payment_pending' %}
+                        <span class="badge badge-warning" style="margin-left:4px;">💳 Awaiting Payment Verification</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="booking-actions">
+                <div class="booking-amount">₹{{ "{:,.0f}".format(item.booking.final_amount) }}</div>
+                <a href="/booking-status/{{ item.booking.id }}" class="btn btn-secondary btn-sm">View Details</a>
+                <a href="/invoice/{{ item.booking.id }}" target="_blank" class="btn btn-secondary btn-sm"><i class="fas fa-file-invoice"></i> Invoice</a>
+                {% if item.booking.status in ['payment_pending'] %}
+                <button class="btn btn-danger btn-sm" onclick="cancelBooking({{ item.booking.id }}, this)">Cancel</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-calendar-times"></i>
+        <h3>No Bookings Yet</h3>
+        <p style="margin-bottom:1.5rem;">You haven't made any bookings. Start exploring our fleet!</p>
+        <a href="/cars" class="btn btn-primary"><i class="fas fa-car"></i> Browse Cars</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function filterBookings(status, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.booking-item').forEach(item => {
+        if (status === 'all' || item.dataset.status === status) item.style.display = '';
+        else item.style.display = 'none';
+    });
+}
+
+async function cancelBooking(id, btn) {
+    if (!confirm('Cancel this booking?')) return;
+    const res = await fetch(`/api/cancel-booking/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) { showToast('Booking cancelled', 'success'); setTimeout(() => location.reload(), 1500); }
+    else showToast(data.message || 'Cannot cancel', 'error');
+}
+</script>
+{% endblock %}

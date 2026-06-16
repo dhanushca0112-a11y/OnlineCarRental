@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}My Wishlist - DCA Car Rentals{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>My <span style="color:var(--accent)">Wishlist</span></h1>
+        <p>Cars you've saved for later</p>
+    </div>
+</div>
+<div class="container" style="padding-top:2rem;padding-bottom:4rem;">
+    {% if cars %}
+    <div class="cars-grid">
+        {% for car in cars %}
+        <div class="car-card">
+            <div class="car-card-img-wrap">
+                <img src="{{ car.image_url }}" alt="{{ car.name }}" class="car-card-img"
+                     onerror="this.src='https://via.placeholder.com/400x200/1a1a2e/f59e0b?text={{ car.name }}'">
+                <div class="car-badge">{{ car.category }}</div>
+                <button class="car-wishlist active" onclick="removeWishlist({{ car.id }}, this.closest('.car-card'))">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
+            <div class="car-card-body">
+                <div class="car-name">{{ car.name }}</div>
+                <div class="car-brand">{{ car.brand }} · {{ car.model_year }}</div>
+                <div class="car-specs">
+                    <div class="car-spec"><i class="fas fa-users"></i> {{ car.seats }} Seats</div>
+                    <div class="car-spec"><i class="fas fa-gas-pump"></i> {{ car.fuel_type }}</div>
+                    <div class="car-spec"><i class="fas fa-cog"></i> {{ car.transmission }}</div>
+                </div>
+                <div class="car-price">
+                    <div>
+                        <div class="car-price-amount">₹{{ "{:,.0f}".format(car.price_per_day) }}</div>
+                        <div class="car-price-per">per day + 18% GST</div>
+                    </div>
+                    <a href="/car/{{ car.id }}" class="btn btn-primary btn-sm">Book Now</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-heart"></i>
+        <h3>Your Wishlist is Empty</h3>
+        <p style="margin-bottom:1.5rem;">Browse cars and tap the heart icon to save them here</p>
+        <a href="/cars" class="btn btn-primary"><i class="fas fa-car"></i> Browse Cars</a>
+    </div>
+    {% endif %}
+</div>
+<script>
+async function removeWishlist(carId, card) {
+    const res = await fetch(`/wishlist/toggle/${carId}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) { card.style.opacity = '0'; card.style.transform = 'scale(0.8)'; setTimeout(() => card.remove(), 300); showToast('Removed from wishlist', 'success'); }
+}
+</script>
+{% endblock %}

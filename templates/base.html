@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DCA Car Rentals{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+    <div class="nav-inner">
+        <a href="/" class="nav-logo">
+            <div class="logo-icon"><i class="fas fa-car"></i></div>
+            <div class="logo-text">DCA<span>Rentals</span></div>
+        </a>
+
+        <ul class="nav-links" id="nav-links">
+            <li><a href="/" class="nav-link {% if request.endpoint=='index' %}active{% endif %}">Home</a></li>
+            <li><a href="/cars" class="nav-link {% if request.endpoint=='cars' %}active{% endif %}">Fleet</a></li>
+            <li class="nav-dropdown">
+                <a href="#" class="nav-link">Company <i class="fas fa-chevron-down" style="font-size:.65rem;"></i></a>
+                <div class="dropdown-menu">
+                    <a href="/about"><i class="fas fa-building"></i> About Us</a>
+                    <a href="/services"><i class="fas fa-concierge-bell"></i> Services</a>
+                    <a href="/contact"><i class="fas fa-phone"></i> Contact</a>
+                </div>
+            </li>
+            <li class="nav-dropdown">
+                <a href="#" class="nav-link">Legal <i class="fas fa-chevron-down" style="font-size:.65rem;"></i></a>
+                <div class="dropdown-menu">
+                    <a href="/terms"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
+                    <a href="/privacy"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
+                </div>
+            </li>
+            {% if session.user_id %}
+            <li><a href="/my-bookings" class="nav-link {% if request.endpoint=='my_bookings' %}active{% endif %}">Bookings</a></li>
+            <li><a href="/wishlist" class="nav-link {% if request.endpoint=='wishlist' %}active{% endif %}"><i class="fas fa-heart"></i></a></li>
+            {% endif %}
+        </ul>
+
+        <div class="nav-actions">
+            <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+            {% if session.user_id %}
+            <div class="nav-user-menu">
+                <button class="nav-avatar-btn" onclick="toggleUserMenu()">
+                    <div class="nav-avatar">{{ session.user_name[0].upper() }}</div>
+                    <span class="nav-username">{{ session.user_name.split()[0] }}</span>
+                    <i class="fas fa-chevron-down" style="font-size:.6rem;color:var(--text2)"></i>
+                </button>
+                <div class="user-dropdown" id="user-dropdown">
+                    <div class="ud-header">
+                        <div class="ud-avatar">{{ session.user_name[0].upper() }}</div>
+                        <div><div class="ud-name">{{ session.user_name }}</div><div class="ud-role">Customer</div></div>
+                    </div>
+                    <div class="ud-links">
+                        <a href="/profile"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="/my-bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>
+                        <a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+                    </div>
+                    <a href="/logout" class="ud-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+            {% else %}
+            <a href="/login" class="btn-ghost">Login</a>
+            <a href="/register" class="btn-gold">Get Started</a>
+            {% endif %}
+            <button class="hamburger" id="hamburger" onclick="toggleMobile()">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+</nav>
+<!-- MOBILE DRAWER -->
+<div class="mobile-drawer" id="mobile-drawer">
+    <div class="mobile-links">
+        <a href="/"><i class="fas fa-home"></i> Home</a>
+        <a href="/cars"><i class="fas fa-car"></i> Browse Fleet</a>
+        <a href="/about"><i class="fas fa-building"></i> About Us</a>
+        <a href="/services"><i class="fas fa-concierge-bell"></i> Services</a>
+        <a href="/contact"><i class="fas fa-phone"></i> Contact</a>
+        <a href="/terms"><i class="fas fa-file-contract"></i> Terms & Conditions</a>
+        <a href="/privacy"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
+        {% if session.user_id %}
+        <a href="/my-bookings"><i class="fas fa-calendar-check"></i> My Bookings</a>
+        <a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+        <a href="/profile"><i class="fas fa-user"></i> Profile</a>
+        <a href="/logout" style="color:var(--red)"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        {% else %}
+        <a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
+        <a href="/register" class="mobile-cta"><i class="fas fa-user-plus"></i> Register Free</a>
+        {% endif %}
+    </div>
+</div>
+<div class="mobile-overlay" id="mob-overlay" onclick="toggleMobile()"></div>
+
+<!-- FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-stack">
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">
+        <i class="fas fa-{{ 'check-circle' if cat=='success' else 'exclamation-circle' }}"></i>
+        {{ msg }}
+        <button onclick="this.parentElement.remove()" style="border:none;background:transparent;color:inherit;cursor:pointer;margin-left:auto;font-size:1rem;">×</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<main style="padding-top:72px;">{% block content %}{% endblock %}</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+    <div class="footer-glow"></div>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo"><i class="fas fa-car"></i> DCA<span>Rentals</span></div>
+                <p>India's most trusted car rental platform. Premium vehicles, transparent pricing, and exceptional service across 25+ cities.</p>
+                <div class="footer-socials">
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                </div>
+                <div class="footer-contact-quick">
+                    <div><i class="fas fa-phone" style="color:var(--accent)"></i> +91 6362948259</div>
+                    <div><i class="fas fa-envelope" style="color:var(--accent)"></i> dhanush@dcacarrentals.com</div>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="/about">About Us</a></li>
+                    <li><a href="/services">Our Services</a></li>
+                    <li><a href="/cars">Browse Fleet</a></li>
+                    <li><a href="/contact">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="/services#self-drive">Self Drive</a></li>
+                    <li><a href="/services#driver">With Driver</a></li>
+                    <li><a href="/services#corporate">Corporate Rental</a></li>
+                    <li><a href="/services#wedding">Wedding Cars</a></li>
+                    <li><a href="/services#airport">Airport Transfer</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="/terms">Terms & Conditions</a></li>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/contact">Help Center</a></li>
+                    <li><a href="/about#faq">FAQs</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-left">
+                <span>© 2026 DCA Car Rentals. All rights reserved.</span>
+                <span class="footer-sep">·</span>
+                <span>Made with <i class="fas fa-heart" style="color:var(--red)"></i> in India</span>
+            </div>
+            <div class="footer-bottom-right">
+                <a href="/terms">Terms</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/contact">Contact</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<div id="toast-container"></div>
+
+<!-- SCROLL TO TOP -->
+<button class="scroll-top" id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <i class="fas fa-arrow-up"></i>
+</button>
+
+<script>
+// ── Theme ──
+function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    document.getElementById('theme-icon').className = next === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+}
+(function() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    const icon = document.getElementById('theme-icon');
+    if (icon) icon.className = saved === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+})();
+
+// ── Navbar scroll ──
+window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    nav.classList.toggle('scrolled', window.scrollY > 30);
+    document.getElementById('scroll-top').classList.toggle('show', window.scrollY > 400);
+});
+
+// ── Mobile ──
+function toggleMobile() {
+    document.getElementById('mobile-drawer').classList.toggle('open');
+    document.getElementById('mob-overlay').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('open');
+}
+
+// ── User dropdown ──
+function toggleUserMenu() {
+    document.getElementById('user-dropdown').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+    const ud = document.getElementById('user-dropdown');
+    if (ud && !e.target.closest('.nav-user-menu')) ud.classList.remove('open');
+});
+
+// ── Toast ──
+function showToast(msg, type='success') {
+    const c = document.getElementById('toast-container');
+    const icons = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.classList.add('fade-out'); setTimeout(() => t.remove(), 400); }, 3500);
+}
+
+// ── Auto dismiss flash ──
+setTimeout(() => { document.querySelectorAll('.flash').forEach(el => el.remove()); }, 5000);
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

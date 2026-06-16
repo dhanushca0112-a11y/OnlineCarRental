@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Invoice {{ booking.booking_id }} - DCA Car Rentals{% endblock %}
+{% block content %}
+<style>
+.invoice-wrap { max-width: 700px; margin: 2rem auto; padding: 0 1rem 4rem; }
+.invoice-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 2.5rem; }
+.invoice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--card-border); }
+.invoice-logo { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+.invoice-meta { text-align: right; }
+.invoice-meta h2 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; }
+.invoice-meta p { color: var(--text2); font-size: 0.8rem; }
+.invoice-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+.party-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); font-weight: 600; margin-bottom: 0.5rem; }
+.party-name { font-weight: 700; margin-bottom: 2px; }
+.party-info { font-size: 0.875rem; color: var(--text2); }
+.invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+.invoice-table th { text-align: left; padding: 0.75rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); background: var(--bg3); }
+.invoice-table td { padding: 0.75rem; border-bottom: 1px solid var(--card-border); font-size: 0.875rem; }
+.invoice-totals { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; margin-bottom: 2rem; }
+.inv-row { display: flex; gap: 3rem; font-size: 0.875rem; }
+.inv-row.grand { font-weight: 800; font-size: 1.1rem; color: var(--accent); padding-top: 0.5rem; border-top: 2px solid var(--card-border); }
+.invoice-footer { text-align: center; padding-top: 1.5rem; border-top: 1px solid var(--card-border); color: var(--text2); font-size: 0.8rem; }
+.status-stamp { display: inline-block; padding: 0.5rem 1.5rem; border-radius: 8px; font-weight: 800; font-size: 1rem; transform: rotate(-5deg); border: 3px solid; margin-bottom: 1rem; }
+.stamp-confirmed { color: var(--green); border-color: var(--green); }
+.stamp-pending { color: var(--accent); border-color: var(--accent); }
+</style>
+<div class="invoice-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
+        <a href="javascript:history.back()" style="color:var(--text2);text-decoration:none;font-size:0.875rem;"><i class="fas fa-arrow-left"></i> Back</a>
+        <div style="display:flex;gap:0.75rem;">
+            <button class="btn btn-secondary btn-sm" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+        </div>
+    </div>
+    <div class="invoice-card">
+        <div style="text-align:center;margin-bottom:1rem;">
+            <div class="status-stamp {% if booking.status == 'confirmed' %}stamp-confirmed{% else %}stamp-pending{% endif %}">
+                {{ 'PAID & CONFIRMED' if booking.status == 'confirmed' else 'PAYMENT PENDING' }}
+            </div>
+        </div>
+        <div class="invoice-header">
+            <div>
+                <div class="invoice-logo"><i class="fas fa-car"></i> DCA Car Rentals</div>
+                <div style="font-size:0.8rem;color:var(--text2);margin-top:4px;">India's Premium Car Rental</div>
+                <div style="font-size:0.8rem;color:var(--text2);">support@dcacarrentals.com</div>
+                <div style="font-size:0.8rem;color:var(--text2);">+91 9999-888-777</div>
+            </div>
+            <div class="invoice-meta">
+                <h2>TAX INVOICE</h2>
+                <p>Invoice #: {{ booking.booking_id }}</p>
+                <p>Date: {{ booking.created_at.strftime('%d %b %Y') }}</p>
+            </div>
+        </div>
+        <div class="invoice-parties">
+            <div>
+                <div class="party-title">Bill To</div>
+                <div class="party-name">{{ user.name }}</div>
+                <div class="party-info">{{ user.email }}</div>
+                <div class="party-info">{{ user.phone }}</div>
+            </div>
+            <div>
+                <div class="party-title">Car Details</div>
+                <div class="party-name">{{ car.name }}</div>
+                <div class="party-info">{{ car.brand }} · {{ car.category }}</div>
+                <div class="party-info">{{ car.fuel_type }} · {{ car.seats }} seats</div>
+            </div>
+        </div>
+        <table class="invoice-table">
+            <thead>
+                <tr><th>Description</th><th>Rate</th><th>Qty</th><th>Amount</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>{{ car.name }} — {{ 'Self Drive' if booking.drive_type == 'self' else 'With Driver' }}</strong><br>
+                        <span style="color:var(--text2);font-size:.8rem;">{{ booking.pickup_date.strftime('%d %b %Y') }} → {{ booking.return_date.strftime('%d %b %Y') }}</span><br>
+                        <span style="color:var(--text2);font-size:.8rem;">{{ booking.pickup_location }} → {{ booking.drop_location }}</span><br>
+                        <span style="color:var(--text2);font-size:.78rem;">Gender: {{ 'Male' if booking.gender == 'male' else 'Female' }}
+                        {% if booking.pickup_time %} · Pickup: {{ booking.pickup_time }}{% endif %}</span>
+                    </td>
+                    <td>₹{{ "{:,.0f}".format(car.price_per_day) }}/day</td>
+                    <td>{{ booking.days }} days</td>
+                    <td>₹{{ "{:,.0f}".format(booking.base_day_amount) }}</td>
+                </tr>
+                {% if booking.base_km_amount > 0 %}
+                <tr>
+                    <td>Distance Charge (₹{{ car.price_per_km }}/km)</td>
+                    <td>₹{{ car.price_per_km }}/km</td>
+                    <td>{{ "%.1f"|format(booking.distance_km) }} km</td>
+                    <td>₹{{ "{:,.0f}".format(booking.base_km_amount) }}</td>
+                </tr>
+                {% endif %}
+                {% if booking.driver_amount > 0 %}
+                <tr>
+                    <td>Driver Charges (₹800/day)</td>
+                    <td>₹800/day</td>
+                    <td>{{ booking.days }} days</td>
+                    <td>₹{{ "{:,.0f}".format(booking.driver_amount) }}</td>
+                </tr>
+                {% endif %}
+                {% if booking.safety_amount > 0 %}
+                <tr>
+                    <td>
+                        🌙 Women's Night Safety Add-on<br>
+                        {% if booking.safety_features %}
+                        <span style="font-size:.75rem;color:var(--text2);">
+                            {{ booking.safety_features | tojson | fromjson | join(' · ') }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>Flat</td>
+                    <td>1</td>
+                    <td style="color:#ec4899;">₹{{ "{:,.0f}".format(booking.safety_amount) }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <div class="invoice-totals">
+            <div class="inv-row"><span>Subtotal (excl. GST)</span><span>₹{{ "{:,.0f}".format(booking.total_amount) }}</span></div>
+            <div class="inv-row"><span>GST @ 18%</span><span>₹{{ "{:,.0f}".format(booking.gst_amount) }}</span></div>
+            <div class="inv-row grand"><span>Total Payable</span><span>₹{{ "{:,.0f}".format(booking.final_amount) }}</span></div>
+        </div>
+        <div style="background:var(--bg3);border-radius:12px;padding:1rem;margin-bottom:1.5rem;">
+            <div style="font-size:0.8rem;color:var(--text2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+                <span><strong style="color:var(--text)">Payment Method:</strong> {{ booking.payment_method or 'UPI' }}</span>
+                {% if booking.upi_transaction_id %}<span><strong style="color:var(--text)">UTR:</strong> {{ booking.upi_transaction_id }}</span>{% endif %}
+                <span><strong style="color:var(--text)">Status:</strong> 
+                    <span style="color:{% if booking.status == 'confirmed' %}var(--green){% else %}var(--accent){% endif %}">{{ booking.payment_status|title }}</span>
+                </span>
+            </div>
+        </div>
+        <div class="invoice-footer">
+            <p>Thank you for choosing DCA Car Rentals! Drive safe and enjoy your journey. 🚗</p>
+            <p style="margin-top:4px;">This is a computer-generated invoice and does not require a signature.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

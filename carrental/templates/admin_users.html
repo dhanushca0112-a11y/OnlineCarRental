@@ -1,0 +1,53 @@
+{% extends "admin_base.html" %}
+{% block title %}Users - Admin{% endblock %}
+{% block page_title %}Customer Management{% endblock %}
+{% block content %}
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;">Customers <span style="color:var(--text2);font-size:0.875rem;font-weight:400;">({{ users_data|length }})</span></h2>
+    <input type="text" placeholder="🔍 Search customers..." style="padding:0.6rem 1rem;border-radius:8px;border:1.5px solid var(--card-border);background:var(--bg3);color:var(--text);font-size:0.875rem;outline:none;width:260px" oninput="filterUsers(this.value)">
+</div>
+
+<div class="table-card">
+    <div class="table-wrap">
+        <table id="users-table">
+            <thead>
+                <tr><th>Customer</th><th>Phone</th><th>Bookings</th><th>Joined</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for item in users_data %}
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.875rem;color:#000;flex-shrink:0">
+                                {{ item.user.name[0].upper() }}
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:0.875rem">{{ item.user.name }}</div>
+                                <div style="font-size:0.75rem;color:var(--text2)">{{ item.user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color:var(--text2);font-size:0.875rem">{{ item.user.phone or '-' }}</td>
+                    <td>
+                        <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent)">{{ item.bookings }}</span>
+                        <a href="/admin/bookings" style="font-size:0.75rem;color:var(--text2);margin-left:6px">view</a>
+                    </td>
+                    <td style="font-size:0.8rem;color:var(--text2)">{{ item.user.created_at.strftime('%d %b %Y') }}</td>
+                    <td><span class="badge badge-success">Active</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterUsers(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#users-table tbody tr').forEach(r => {
+        r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

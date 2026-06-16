@@ -1,0 +1,92 @@
+{% extends "admin_base.html" %}
+{% block title %}Payments - Admin{% endblock %}
+{% block page_title %}Payment Management{% endblock %}
+{% block content %}
+
+{% if pending_data %}
+<div style="margin-bottom:2rem;">
+    <h3 style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--accent)">
+        <i class="fas fa-clock"></i> Pending Verification ({{ pending_data|length }})
+    </h3>
+    <div style="display:grid;gap:1rem;">
+        {% for item in pending_data %}
+        <div style="background:var(--card);border:1px solid rgba(245,158,11,0.3);border-radius:16px;padding:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <div style="display:flex;align-items:center;gap:1rem;">
+                {% if item.car %}
+                <img src="{{ item.car.image_url }}" style="width:64px;height:46px;border-radius:8px;object-fit:cover" onerror="this.style.display='none'">
+                {% endif %}
+                <div>
+                    <div style="font-weight:700">{{ item.booking.booking_id }}</div>
+                    <div style="font-size:0.8rem;color:var(--text2)">{{ item.user.name if item.user else 'N/A' }} · {{ item.car.name if item.car else '' }}</div>
+                    <div style="font-size:0.8rem;color:var(--text2)">{{ item.booking.pickup_date.strftime('%d %b') }} → {{ item.booking.return_date.strftime('%d %b %Y') }}</div>
+                    {% if item.booking.upi_transaction_id %}
+                    <div style="font-size:0.75rem;color:var(--text2);margin-top:2px;">UTR: <code style="color:var(--accent)">{{ item.booking.upi_transaction_id }}</code></div>
+                    {% endif %}
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+                <div style="text-align:center">
+                    <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--accent)">₹{{ "{:,.0f}".format(item.booking.final_amount) }}</div>
+                    <div style="font-size:0.75rem;color:var(--text2)">{{ item.booking.payment_method or 'UPI' }}</div>
+                </div>
+                <div style="display:flex;gap:0.5rem;">
+                    <button class="btn btn-success" onclick="confirm_pay({{ item.booking.id }})"><i class="fas fa-check"></i> Confirm</button>
+                    <button class="btn btn-danger" onclick="reject_pay({{ item.booking.id }})"><i class="fas fa-times"></i> Reject</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="table-card">
+    <div class="table-header">
+        <h3>All Payment History</h3>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Booking ID</th><th>Customer</th><th>Car</th><th>Amount</th><th>Method</th><th>UTR</th><th>Payment Status</th><th>Booking Status</th></tr>
+            </thead>
+            <tbody>
+                {% for item in all_data %}
+                <tr>
+                    <td><code style="color:var(--accent);font-size:0.78rem">{{ item.booking.booking_id }}</code></td>
+                    <td>{{ item.user.name if item.user else 'N/A' }}</td>
+                    <td>{{ item.car.name if item.car else 'N/A' }}</td>
+                    <td style="font-weight:700;color:var(--accent)">₹{{ "{:,.0f}".format(item.booking.final_amount) }}</td>
+                    <td>{{ item.booking.payment_method or '-' }}</td>
+                    <td><code style="font-size:0.75rem;color:var(--text2)">{{ item.booking.upi_transaction_id or '-' }}</code></td>
+                    <td>
+                        {% if item.booking.payment_status == 'confirmed' %}<span class="badge badge-success">Confirmed</span>
+                        {% elif item.booking.payment_status == 'paid' %}<span class="badge badge-warning">Awaiting</span>
+                        {% elif item.booking.payment_status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+                        {% else %}<span class="badge badge-secondary">Unpaid</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if item.booking.status == 'confirmed' %}<span class="badge badge-success">Confirmed</span>
+                        {% elif item.booking.status == 'payment_pending' %}<span class="badge badge-warning">Pending</span>
+                        {% elif item.booking.status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+                        {% else %}<span class="badge badge-secondary">{{ item.booking.status }}</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+async function confirm_pay(id) {
+    if (!confirm('Confirm this payment?')) return;
+    const d = await apiAction(`/admin/payment/confirm/${id}`);
+    if (d.success) { showToast('Payment confirmed!', 'success'); setTimeout(() => location.reload(), 1200); }
+}
+async function reject_pay(id) {
+    if (!confirm('Reject this payment?')) return;
+    const d = await apiAction(`/admin/payment/reject/${id}`);
+    if (d.success) { showToast('Rejected', 'error'); setTimeout(() => location.reload(), 1200); }
+}
+</script>
+{% endblock %}

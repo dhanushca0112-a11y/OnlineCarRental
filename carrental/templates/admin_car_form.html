@@ -1,0 +1,208 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ 'Edit' if car else 'Add' }} Car - Admin{% endblock %}
+{% block page_title %}{{ 'Edit Car' if car else 'Add New Car' }}{% endblock %}
+{% block content %}
+<style>
+.form-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; }
+.form-card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+.img-preview { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-top: 8px; border: 1px solid var(--card-border); background: var(--bg3); display: flex; align-items: center; justify-content: center; color: var(--text2); }
+.feature-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--accent); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
+.feature-chip button { border: none; background: transparent; color: var(--accent); cursor: pointer; font-size: 0.75rem; padding: 0; line-height: 1; }
+</style>
+
+<div style="margin-bottom:1.25rem;">
+    <a href="/admin/cars" style="color:var(--text2);text-decoration:none;font-size:0.875rem;"><i class="fas fa-arrow-left"></i> Back to Cars</a>
+</div>
+
+<form method="POST" action="{{ '/admin/car/edit/' + car.id|string if car else '/admin/car/add' }}">
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:1.5rem;">
+        <div>
+            <!-- BASIC INFO -->
+            <div class="form-card">
+                <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Car Name *</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Mahindra Thar" value="{{ car.name if car else '' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Brand *</label>
+                        <input type="text" name="brand" class="form-control" placeholder="e.g. Mahindra" value="{{ car.brand if car else '' }}" required>
+                    </div>
+                </div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label class="form-label">Model Year</label>
+                        <input type="number" name="model_year" class="form-control" value="{{ car.model_year if car else 2026 }}" min="2010" max="2026">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-control">
+                            {% for cat in ['SUV','Hatchback','Sedan','MPV','Luxury','Electric'] %}
+                            <option value="{{ cat }}" {% if car and car.category == cat %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Color</label>
+                        <input type="text" name="color" class="form-control" placeholder="e.g. Napoli Black" value="{{ car.color if car else '' }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="3" placeholder="Brief description of the car...">{{ car.description if car else '' }}</textarea>
+                </div>
+            </div>
+
+            <!-- SPECS -->
+            <div class="form-card">
+                <h3><i class="fas fa-cogs"></i> Specifications</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Seats</label>
+                        <select name="seats" class="form-control">
+                            {% for s in [4,5,6,7,8,9] %}
+                            <option value="{{ s }}" {% if car and car.seats == s %}selected{% elif not car and s == 5 %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fuel Type</label>
+                        <select name="fuel_type" class="form-control">
+                            {% for f in ['Petrol','Diesel','Electric','CNG','Hybrid'] %}
+                            <option value="{{ f }}" {% if car and car.fuel_type == f %}selected{% endif %}>{{ f }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Transmission</label>
+                        <select name="transmission" class="form-control">
+                            <option value="Manual" {% if car and car.transmission == 'Manual' %}selected{% endif %}>Manual</option>
+                            <option value="Automatic" {% if car and car.transmission == 'Automatic' %}selected{% endif %}>Automatic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mileage</label>
+                        <input type="text" name="mileage" class="form-control" placeholder="e.g. 17.4 kmpl" value="{{ car.mileage if car else '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- FEATURES -->
+                       <!-- FEATURES -->
+            <div class="form-card">
+                <h3><i class="fas fa-star"></i> Features</h3>
+                <div style="display:flex;gap:0.75rem;margin-bottom:1rem;">
+                    <input type="text" id="feature-input" class="form-control" placeholder="e.g. Sunroof, ADAS, Bose Sound..." style="flex:1">
+                    <button type="button" class="btn btn-secondary" onclick="addFeature()"><i class="fas fa-plus"></i> Add</button>
+                </div>
+                <div id="features-container" style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+                    {% if car and car.features %}
+                    {% for f in car.features | tojson | fromjson %}
+                    <div class="feature-chip">
+                        <input type="hidden" name="features" value="{{ f }}">
+                        <span>{{ f }}</span>
+                        <button type="button" onclick="this.closest('.feature-chip').remove()">×</button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div>
+            <!-- PRICING -->
+            <div class="form-card">
+                <h3><i class="fas fa-rupee-sign"></i> Pricing (₹)</h3>
+                <div class="form-group">
+                    <label class="form-label">Price Per Day *</label>
+                    <input type="number" name="price_per_day" class="form-control" placeholder="2500" value="{{ car.price_per_day if car else '' }}" min="0" step="50" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Price Per KM</label>
+                    <input type="number" name="price_per_km" class="form-control" placeholder="12" value="{{ car.price_per_km if car else 12 }}" min="0" step="1">
+                </div>
+            </div>
+
+            <!-- IMAGE -->
+            <div class="form-card">
+                <h3><i class="fas fa-image"></i> Car Image</h3>
+                <div class="form-group">
+                    <label class="form-label">Image URL</label>
+                    <input type="url" name="image_url" class="form-control" id="image-url"
+                           placeholder="https://..."
+                           value="{{ car.image_url if car else '' }}"
+                           oninput="previewImage(this.value)">
+                </div>
+                <div id="img-preview-wrap">
+                    {% if car and car.image_url %}
+                    <img id="img-preview" src="{{ car.image_url }}" class="img-preview" alt="Preview">
+                    {% else %}
+                    <div class="img-preview" id="img-preview-placeholder"><i class="fas fa-image" style="font-size:2rem;opacity:0.3"></i></div>
+                    {% endif %}
+                </div>
+                <div style="margin-top:0.75rem;">
+                    <p style="font-size:0.75rem;color:var(--text2);margin-bottom:0.5rem;">Quick select Indian cars:</p>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        {% for name, url in [
+                            ('Mahindra Thar', 'https://imgd.aeplcdn.com/664x374/n/cw/ec/40087/thar-exterior-right-front-three-quarter-2.jpeg?isig=0&q=80'),
+                            ('Tata Nexon', 'https://imgd.aeplcdn.com/664x374/n/cw/ec/141115/nexon-exterior-right-front-three-quarter-4.jpeg?isig=0&q=80'),
+                            ('Maruti Swift', 'https://imgd.aeplcdn.com/664x374/n/cw/ec/159087/swift-exterior-right-front-three-quarter-3.jpeg?isig=0&q=80'),
+                            ('Hyundai Creta', 'https://imgd.aeplcdn.com/664x374/n/cw/ec/106815/creta-exterior-right-front-three-quarter-2.jpeg?isig=0&q=80'),
+                            ('Toyota Innova', 'https://imgd.aeplcdn.com/664x374/n/cw/ec/45701/crysta-exterior-right-front-three-quarter-3.jpeg?isig=0&q=80')
+                        ] %}
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="setImageUrl('{{ url }}')" style="justify-content:flex-start;font-size:0.75rem;">{{ name }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- AVAILABILITY -->
+            <div class="form-card">
+                <h3><i class="fas fa-toggle-on"></i> Availability</h3>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                    <label class="toggle">
+                        <input type="checkbox" name="is_available" {% if not car or car.is_available %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span style="font-size:0.875rem;">Car is available for booking</span>
+                </label>
+            </div>
+
+            <div style="display:flex;gap:0.75rem;">
+                <button type="submit" class="btn btn-primary" style="flex:1;justify-content:center;">
+                    <i class="fas fa-save"></i> {{ 'Update Car' if car else 'Add Car' }}
+                </button>
+                <a href="/admin/cars" class="btn btn-secondary"><i class="fas fa-times"></i></a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+function addFeature() {
+    const input = document.getElementById('feature-input');
+    const val = input.value.trim();
+    if (!val) return;
+    const chip = document.createElement('div');
+    chip.className = 'feature-chip';
+    chip.innerHTML = `<input type="hidden" name="features" value="${val}"><span>${val}</span><button type="button" onclick="this.closest('.feature-chip').remove()">×</button>`;
+    document.getElementById('features-container').appendChild(chip);
+    input.value = '';
+}
+document.getElementById('feature-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addFeature(); } });
+
+function previewImage(url) {
+    const wrap = document.getElementById('img-preview-wrap');
+    if (url) wrap.innerHTML = `<img id="img-preview" src="${url}" class="img-preview" onerror="this.style.display='none'" alt="Preview">`;
+}
+
+function setImageUrl(url) {
+    document.getElementById('image-url').value = url;
+    previewImage(url);
+}
+</script>
+{% endblock %}

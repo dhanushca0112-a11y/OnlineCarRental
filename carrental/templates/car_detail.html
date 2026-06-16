@@ -1,0 +1,612 @@
+{% extends "base.html" %}
+{% block title %}{{ car.name }} - DCA Car Rentals{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+.detail-grid { display:grid; grid-template-columns:1fr 400px; gap:2rem; padding:2rem 0 4rem; }
+.car-gallery img { width:100%; border-radius:20px; height:380px; object-fit:cover; }
+.car-meta { display:flex; gap:.75rem; flex-wrap:wrap; margin:1rem 0; }
+.meta-item { background:var(--card); border:1px solid var(--card-border); border-radius:12px; padding:.6rem .9rem; display:flex; align-items:center; gap:7px; font-size:.825rem; }
+.meta-item i { color:var(--accent); width:15px; text-align:center; }
+.features-list { display:flex; flex-wrap:wrap; gap:.5rem; margin:1rem 0; }
+.feature-tag { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.2); color:var(--accent); padding:5px 11px; border-radius:20px; font-size:.78rem; font-weight:500; }
+
+/* Booking card */
+.booking-card { background:var(--card); border:1px solid var(--card-border); border-radius:20px; padding:1.4rem; position:sticky; top:84px; backdrop-filter:blur(20px); max-height:calc(100vh - 100px); overflow-y:auto; }
+.booking-card::-webkit-scrollbar { width:4px; }
+.booking-card::-webkit-scrollbar-thumb { background:var(--card-border); border-radius:4px; }
+.booking-price { font-family:'Syne',sans-serif; font-size:1.7rem; font-weight:800; color:var(--accent); }
+.booking-price-sub { font-size:.75rem; color:var(--text2); margin-top:2px; }
+
+/* Step label */
+.step-lbl { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.7px; color:var(--text2); margin:.9rem 0 .4rem; display:flex; align-items:center; gap:5px; }
+
+/* Mode tabs */
+.mode-tabs { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+.mode-tab { padding:.6rem; border-radius:10px; border:2px solid var(--card-border); background:transparent; color:var(--text2); cursor:pointer; font-size:.78rem; font-weight:600; transition:all .2s; text-align:center; }
+.mode-tab i { display:block; font-size:1rem; margin-bottom:3px; }
+.mode-tab.active { border-color:var(--accent); background:rgba(245,158,11,.08); color:var(--accent); }
+.driver-note { font-size:.72rem; color:var(--blue); margin-top:.45rem; padding:.5rem .75rem; background:rgba(59,130,246,.07); border-radius:8px; border:1px solid rgba(59,130,246,.15); }
+
+/* Gender */
+.gender-wrap { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+.gender-btn { padding:.6rem; border-radius:10px; border:2px solid var(--card-border); background:transparent; color:var(--text2); cursor:pointer; font-size:.78rem; font-weight:600; transition:all .2s; text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; }
+.gender-btn i { font-size:1.1rem; }
+.gender-btn.gm { border-color:var(--blue);  background:rgba(59,130,246,.08); color:var(--blue);  }
+.gender-btn.gf { border-color:#ec4899;      background:rgba(236,72,153,.08); color:#ec4899;      }
+
+/* Night safety panel */
+.safety-panel { display:none; background:rgba(236,72,153,.05); border:1.5px solid rgba(236,72,153,.22); border-radius:14px; padding:1rem; margin-top:.6rem; }
+.safety-panel.show { display:block; animation:fs .3s ease; }
+@keyframes fs { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.safety-title { font-size:.78rem; font-weight:700; color:#ec4899; margin-bottom:.6rem; display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.night-badge { display:inline-flex; align-items:center; gap:4px; background:rgba(236,72,153,.18); border:1px solid rgba(236,72,153,.35); color:#ec4899; font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:20px; }
+.sf-item { display:flex; align-items:flex-start; gap:.55rem; margin-bottom:.55rem; }
+.sf-item input { accent-color:#ec4899; margin-top:2px; width:14px; height:14px; flex-shrink:0; cursor:pointer; }
+.sf-item label { font-size:.75rem; color:var(--text); cursor:pointer; line-height:1.4; }
+.sf-item label small { display:block; color:var(--text2); font-size:.68rem; }
+
+/* Driver Verification */
+.driver-verify-panel { background:rgba(16,185,129,.05); border:1.5px solid rgba(16,185,129,.22); border-radius:14px; padding:1rem; margin:.9rem 0; animation:fs .3s ease; }
+.verify-radio-group { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin:.6rem 0; }
+.verify-radio { display:flex; align-items:center; gap:.5rem; padding:.6rem .75rem; border:2px solid var(--card-border); border-radius:10px; background:transparent; cursor:pointer; transition:all .2s; }
+.verify-radio input { accent-color:var(--green); width:16px; height:16px; cursor:pointer; }
+.verify-radio label { font-size:.85rem; font-weight:600; color:var(--text); cursor:pointer; flex:1; }
+.verify-radio:has(input:checked) { border-color:var(--green); background:rgba(16,185,129,.08); }
+.verify-error { display:none; background:rgba(239,68,68,.08); border:1.5px solid rgba(239,68,68,.22); border-radius:10px; padding:.75rem; margin:.75rem 0; font-size:.78rem; color:var(--red); animation:fs .3s ease; }
+.verify-error.show { display:flex; align-items:center; gap:.5rem; }
+.verify-error i { flex-shrink:0; }
+.verify-success { display:none; background:rgba(16,185,129,.08); border:1.5px solid rgba(16,185,129,.22); border-radius:10px; padding:.75rem; margin:.75rem 0; font-size:.78rem; color:var(--green); animation:fs .3s ease; }
+.verify-success.show { display:flex; align-items:center; gap:.5rem; }
+.verify-success i { flex-shrink:0; }
+
+/* Price box */
+.price-box { background:var(--bg3); border-radius:12px; padding:.9rem; margin:.75rem 0; }
+.prow { display:flex; justify-content:space-between; font-size:.8rem; padding:3px 0; color:var(--text2); }
+.prow .v { color:var(--text); font-weight:500; }
+.prow.hlt .v { color:var(--accent); }
+.prow.tot { border-top:1px solid var(--card-border); margin-top:5px; padding-top:8px; font-weight:700; font-size:.9rem; }
+.prow.tot .v { color:var(--accent); font-size:1.05rem; }
+
+/* Trust */
+.trust-mini { display:flex; flex-direction:column; gap:.35rem; margin-top:.9rem; padding-top:.9rem; border-top:1px solid var(--card-border); }
+.trust-mini div { display:flex; align-items:center; gap:7px; font-size:.74rem; color:var(--text2); }
+
+/* Reviews */
+.reviews-section { margin-top:2rem; }
+.review-item { background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:1.1rem; margin-bottom:.9rem; }
+.rv-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:.4rem; }
+.rv-stars { color:#fbbf24; font-size:.82rem; }
+.rv-text { color:var(--text2); font-size:.85rem; line-height:1.6; }
+.rating-star { font-size:1.4rem; cursor:pointer; color:var(--text3); transition:all .15s; }
+.rating-star:hover,.rating-star.active { color:#fbbf24; transform:scale(1.2); }
+.add-rv { background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:1.25rem; margin-bottom:1.25rem; }
+
+#map { height:240px; border-radius:13px; overflow:hidden; border:1px solid var(--card-border); margin:.6rem 0; }
+#route-info { display:none; background:var(--card); border:1px solid var(--card-border); border-radius:12px; padding:.9rem; margin-top:.5rem; display:flex; gap:2rem; flex-wrap:wrap; }
+
+@media (max-width:900px) { .detail-grid { grid-template-columns:1fr; } .booking-card { position:static; max-height:none; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div style="padding:1.5rem 0 0">
+    <a href="/cars" style="color:var(--text2);text-decoration:none;font-size:.875rem;"><i class="fas fa-arrow-left"></i> Back to Cars</a>
+  </div>
+
+  <div class="detail-grid">
+
+    <!-- ══════ LEFT ══════ -->
+    <div>
+      <div class="car-gallery">
+        <img src="{{ car.image_url }}" alt="{{ car.name }}"
+             onerror="this.src='https://via.placeholder.com/800x380/1a1a2e/f59e0b?text={{ car.name }}'">
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;margin-top:1.25rem;">
+        <div>
+          <h1 style="font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;">{{ car.name }}</h1>
+          <p style="color:var(--text2);">{{ car.brand }} · {{ car.model_year }} · {{ car.color }}</p>
+        </div>
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          {% if session.user_id %}
+          <button class="btn btn-secondary {% if in_wishlist %}btn-danger{% endif %}"
+                  onclick="toggleWishlist({{ car.id }}, this)" style="font-size:.78rem;padding:.45rem .9rem;">
+            <i class="fas fa-heart"></i> {% if in_wishlist %}In Wishlist{% else %}Wishlist{% endif %}
+          </button>
+          {% endif %}
+          <span class="badge {% if car.is_available %}badge-success{% else %}badge-danger{% endif %}">
+            {{ 'Available' if car.is_available else 'Unavailable' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="car-meta">
+        <div class="meta-item"><i class="fas fa-users"></i> {{ car.seats }} Seats</div>
+        <div class="meta-item"><i class="fas fa-gas-pump"></i> {{ car.fuel_type }}</div>
+        <div class="meta-item"><i class="fas fa-cog"></i> {{ car.transmission }}</div>
+        <div class="meta-item"><i class="fas fa-tachometer-alt"></i> {{ car.mileage }}</div>
+        <div class="meta-item"><i class="fas fa-tag"></i> {{ car.category }}</div>
+        <div class="meta-item"><i class="fas fa-road"></i> ₹{{ car.price_per_km }}/km</div>
+      </div>
+
+      <p style="color:var(--text2);line-height:1.7;margin:1rem 0;">{{ car.description }}</p>
+
+
+      <!-- MAP -->
+      <div style="margin-top:2rem;">
+        <h3 style="font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:.4rem;">
+          <i class="fas fa-map-marker-alt" style="color:var(--accent)"></i> Route Preview
+        </h3>
+        <p style="font-size:.78rem;color:var(--text2);margin-bottom:.4rem;">Enter pickup &amp; drop to see route and auto-calculate km charge</p>
+        <div id="map"></div>
+        <div id="route-info">
+          <div><div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;" id="dist-val">-</div><div style="font-size:.72rem;color:var(--text2);">Distance</div></div>
+          <div><div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;" id="time-val">-</div><div style="font-size:.72rem;color:var(--text2);">Est. Time</div></div>
+          <div><div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--accent);" id="km-cost-val">-</div><div style="font-size:.72rem;color:var(--text2);">KM Charge</div></div>
+        </div>
+      </div>
+
+      <!-- REVIEWS -->
+      <div class="reviews-section">
+        <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:1.1rem;">Reviews ({{ reviews|length }})</h3>
+        {% if session.user_id %}
+        <div class="add-rv">
+          <h4 style="font-weight:600;margin-bottom:.4rem;font-size:.9rem;">Write a Review</h4>
+          <div style="display:flex;gap:5px;margin:.5rem 0;">
+            {% for i in range(1,6) %}
+            <span class="rating-star" onclick="setRating({{ i }})">★</span>
+            {% endfor %}
+          </div>
+          <textarea class="form-control" id="review-text" rows="3" placeholder="Share your experience..."></textarea>
+          <button class="btn btn-primary btn-sm" style="margin-top:.55rem;" onclick="submitReview()">Submit Review</button>
+        </div>
+        {% endif %}
+        {% for r in reviews %}
+        <div class="review-item">
+          <div class="rv-head">
+            <div><div style="font-weight:600;font-size:.875rem;">{{ r.user_name }}</div><div style="font-size:.72rem;color:var(--text2);">{{ r.date }}</div></div>
+            <div class="rv-stars">{% for i in range(r.rating) %}★{% endfor %}{% for i in range(5-r.rating) %}☆{% endfor %}</div>
+          </div>
+          <p class="rv-text">{{ r.comment }}</p>
+        </div>
+        {% endfor %}
+        {% if not reviews %}
+        <div style="text-align:center;padding:2rem;color:var(--text2);"><i class="fas fa-star" style="font-size:1.8rem;opacity:.3"></i><p style="margin-top:.5rem;">No reviews yet. Be the first!</p></div>
+        {% endif %}
+      </div>
+    </div><!-- /left -->
+
+    <!-- ══════ RIGHT – BOOKING CARD ══════ -->
+    <div>
+      <div class="booking-card">
+
+        <!-- Price header -->
+        <div class="booking-price">₹{{ "{:,.0f}".format(car.price_per_day) }}</div>
+        <div class="booking-price-sub">per day &nbsp;+&nbsp; ₹{{ car.price_per_km }}/km &nbsp;+&nbsp; 18% GST</div>
+
+        {% if car.is_available %}
+
+        <!-- ①  Drive Mode -->
+        <div class="step-lbl"><span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;">1</span> Ride Mode</div>
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="tab-self" onclick="selectMode('self')">
+            <i class="fas fa-steering-wheel"></i>Self Drive
+          </button>
+          <button class="mode-tab" id="tab-driver" onclick="selectMode('driver')">
+            <i class="fas fa-user-tie"></i>With Driver
+          </button>
+        </div>
+        <div class="driver-note" id="driver-note" style="display:none;">
+          <i class="fas fa-info-circle"></i> Professional verified driver · ₹800/day extra · Available 24×7
+        </div>
+
+        <!-- ②  Driver Verification -->
+        <div class="step-lbl"><span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;">2</span> Driver Verification</div>
+        <div class="driver-verify-panel">
+          <p style="font-size:.78rem;color:var(--text2);margin-bottom:.6rem;"><i class="fas fa-id-card" style="color:var(--accent);margin-right:5px;"></i>Do you have a valid Driving License?</p>
+          
+          <div class="verify-radio-group">
+            <label class="verify-radio">
+              <input type="radio" name="has-license" value="yes" onchange="updateDriverVerification('yes')">
+              <span style="font-size:.85rem;font-weight:600;color:var(--text);"><i class="fas fa-check-circle"></i> Yes</span>
+            </label>
+            <label class="verify-radio">
+              <input type="radio" name="has-license" value="no" onchange="updateDriverVerification('no')">
+              <span style="font-size:.85rem;font-weight:600;color:var(--text);"><i class="fas fa-times-circle"></i> No</span>
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-top:.75rem;">
+            <label class="form-label">Government ID Proof <span style="color:var(--red);">*</span></label>
+            <select class="form-control" id="id-proof" disabled onchange="updateDriverVerification(document.querySelector('input[name=has-license]:checked')?.value || '')">
+              <option value="">Select an ID Proof Type</option>
+              <option value="aadhaar">Aadhaar Card</option>
+              <option value="pan">PAN Card</option>
+              <option value="voter">Voter ID Card</option>
+              <option value="passport">Passport</option>
+              <option value="other">Other Government-Issued ID</option>
+            </select>
+          </div>
+
+          <div class="verify-error" id="verify-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>A valid Driving License is mandatory to rent a vehicle. You cannot proceed without one.</span>
+          </div>
+          <div class="verify-success" id="verify-success">
+            <i class="fas fa-check-circle"></i>
+            <span>Driver verification complete. You can now select dates and continue booking.</span>
+          </div>
+        </div>
+
+        <!-- ③  Gender -->
+        <div class="step-lbl"><span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;">3</span> Traveller Gender</div>
+        <div class="gender-wrap">
+          <button class="gender-btn gm" id="gbtn-male" onclick="selectGender('male')">
+            <i class="fas fa-mars"></i>Male
+          </button>
+          <button class="gender-btn" id="gbtn-female" onclick="selectGender('female')">
+            <i class="fas fa-venus"></i>Female
+          </button>
+        </div>
+
+        <!-- Night Safety Panel -->
+        <div class="safety-panel" id="safety-panel">
+          <div class="safety-title">
+            <i class="fas fa-shield-alt"></i>Women's Safety Features
+            <span class="night-badge" id="night-badge" style="display:none;"><i class="fas fa-moon"></i>&nbsp;After 10 PM – ₹200 charge</span>
+          </div>
+          <p style="font-size:.72rem;color:var(--text2);margin-bottom:.65rem;">Select the safety add-ons you want for your trip. Night charge (₹200) auto-applied for journeys after 10 PM.</p>
+
+          <div class="sf-item">
+            <input type="checkbox" id="sf-sos" value="SOS Emergency Button & Live Location" checked>
+            <label for="sf-sos">SOS Emergency Button
+              <small>One-tap alert to emergency contacts &amp; local police</small></label>
+          </div>
+          <div class="sf-item">
+            <input type="checkbox" id="sf-track" value="Real-time GPS Tracking shared with family" checked>
+            <label for="sf-track">Real-time GPS Tracking
+              <small>Live route shared with your chosen contacts</small></label>
+          </div>
+          <div class="sf-item">
+            <input type="checkbox" id="sf-cam" value="In-car Dashcam Recording">
+            <label for="sf-cam">In-car Dashcam Recording
+              <small>Trip recorded for your safety &amp; evidence</small></label>
+          </div>
+          <div class="sf-item">
+            <input type="checkbox" id="sf-verify" value="Verified Female Driver Preferred">
+            <label for="sf-verify">Verified Female Driver Preferred
+              <small>Background-checked female driver where available</small></label>
+          </div>
+          <div class="sf-item">
+            <input type="checkbox" id="sf-escort" value="Police-Patrolled Route (Night)">
+            <label for="sf-escort">Police-Patrolled Route (Night)
+              <small>Navigation via safer, monitored corridors after 10 PM</small></label>
+          </div>
+          <div class="sf-item">
+            <input type="checkbox" id="sf-helpline" value="24×7 Women Helpline (1091) In-App" checked>
+            <label for="sf-helpline">24×7 Women Helpline (1091)
+              <small>Direct connect to national &amp; DCA Car Rentals safety desk</small></label>
+          </div>
+        </div>
+
+        <!-- ④  Dates & Time -->
+        <div class="step-lbl"><span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;">4</span> Trip Dates &amp; Time</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem;">
+          <div class="form-group" style="margin-bottom:.55rem;">
+            <label class="form-label">Pickup Date</label>
+            <input type="date" class="form-control" id="pickup-date" min="{{ today }}" onchange="calcPrice();checkNight()">
+          </div>
+          <div class="form-group" style="margin-bottom:.55rem;">
+            <label class="form-label">Return Date</label>
+            <input type="date" class="form-control" id="return-date" min="{{ today }}" onchange="calcPrice()">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:.75rem;">
+          <label class="form-label">
+            Pickup Time
+            <span style="font-size:.68rem;color:#ec4899;"> ← night charge after 10 PM for female</span>
+          </label>
+          <input type="time" class="form-control" id="pickup-time" value="09:00" onchange="checkNight();calcPrice()">
+        </div>
+
+        <!-- ⑤  Locations -->
+        <div class="step-lbl"><span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;flex-shrink:0;">5</span> Locations</div>
+        <div class="form-group" style="margin-bottom:.55rem;">
+          <label class="form-label">📍 Pickup Location</label>
+          <input type="text" class="form-control" id="pickup-loc" placeholder="e.g. Bangalore Airport" oninput="debounceGeocode('pickup')">
+        </div>
+        <div class="form-group" style="margin-bottom:.75rem;">
+          <label class="form-label">🎯 Drop Location</label>
+          <input type="text" class="form-control" id="drop-loc" placeholder="e.g. MG Road, Bangalore" oninput="debounceGeocode('drop')">
+        </div>
+
+        <!-- Price Breakdown -->
+        <div class="price-box" id="price-breakdown" style="display:none;">
+          <div class="prow"><span>₹{{ "{:,.0f}".format(car.price_per_day) }} × <span id="days-count">0</span> days</span><span class="v" id="day-price">₹0</span></div>
+          <div class="prow" id="km-row" style="display:none;"><span>₹{{ car.price_per_km }}/km × <span id="km-count">0</span> km</span><span class="v" id="km-price">₹0</span></div>
+          <div class="prow" id="driver-row" style="display:none;"><span>Driver ₹800 × <span id="drv-days">0</span> days</span><span class="v" id="driver-price">₹0</span></div>
+          <div class="prow" id="safety-row" style="display:none;"><span>🌙 Night safety add-on</span><span class="v" style="color:#ec4899;">₹200</span></div>
+          <div class="prow hlt"><span>GST (18%)</span><span class="v" id="gst-amount">₹0</span></div>
+          <div class="prow tot"><span>Total Payable</span><span class="v" id="total-price">₹0</span></div>
+        </div>
+
+        {% if session.user_id %}
+        <button class="btn btn-primary" style="width:100%;padding:.85rem;font-size:.9rem;" onclick="proceedBooking()">
+          <i class="fas fa-calendar-check"></i> Confirm Booking
+        </button>
+        {% else %}
+        <a href="/login" class="btn btn-primary" style="width:100%;display:flex;justify-content:center;padding:.85rem;">
+          <i class="fas fa-sign-in-alt"></i> Login to Book
+        </a>
+        {% endif %}
+
+        {% else %}
+        <div style="text-align:center;padding:2rem 0;color:var(--text2);">
+          <i class="fas fa-ban" style="font-size:2rem;color:var(--red);display:block;margin-bottom:.5rem;"></i>
+          Car not available for booking
+        </div>
+        {% endif %}
+
+        <div class="trust-mini">
+          <div><i class="fas fa-shield-alt" style="color:var(--green);width:14px"></i> Fully insured &amp; sanitized</div>
+          <div><i class="fas fa-undo" style="color:var(--blue);width:14px"></i> Free cancellation 24h before</div>
+          <div><i class="fas fa-headset" style="color:var(--accent);width:14px"></i> 24/7 roadside assistance</div>
+          <div><i class="fas fa-female" style="color:#ec4899;width:14px"></i> Women's safety features available</div>
+        </div>
+      </div>
+    </div><!-- /right -->
+
+  </div><!-- /detail-grid -->
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+const CAR_ID         = {{ car.id }};
+const PRICE_PER_DAY  = {{ car.price_per_day }};
+const PRICE_PER_KM   = {{ car.price_per_km }};
+const DRIVER_PER_DAY = 800;
+const SAFETY_CHARGE  = 200;
+
+let selectedRating = 0;
+let selectedMode   = 'self';
+let selectedGender = 'male';
+let driverLicenseVerified = false;
+let selectedIdProof = '';
+let pickupCoords   = null, dropCoords = null;
+let distanceKm     = 0;
+let routeLayer     = null;
+let nightActive    = false;
+
+/* ── Map init ── */
+const map = L.map('map').setView([12.9716, 77.5946], 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  { attribution:'© OpenStreetMap' }).addTo(map);
+const goldIcon = L.divIcon({
+  html:'<div style="width:16px;height:16px;background:#f59e0b;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>',
+  className:'', iconSize:[16,16], iconAnchor:[8,8]
+});
+let pickupMarker=null, dropMarker=null;
+
+/* ── Mode ── */
+function selectMode(m) {
+  selectedMode = m;
+  document.getElementById('tab-self').classList.toggle('active', m==='self');
+  document.getElementById('tab-driver').classList.toggle('active', m==='driver');
+  document.getElementById('driver-note').style.display = m==='driver' ? 'block' : 'none';
+  calcPrice();
+}
+
+/* ── Gender ── */
+function selectGender(g) {
+  selectedGender = g;
+  document.getElementById('gbtn-male').className   = 'gender-btn' + (g==='male'   ? ' gm' : '');
+  document.getElementById('gbtn-female').className = 'gender-btn' + (g==='female' ? ' gf' : '');
+  const panel = document.getElementById('safety-panel');
+  if (g==='female') { panel.classList.add('show'); checkNight(); }
+  else              { panel.classList.remove('show'); nightActive=false; }
+  calcPrice();
+}
+
+/* ── Driver Verification ── */
+function updateDriverVerification(choice) {
+  const idProofSelect = document.getElementById('id-proof');
+  const errorMsg = document.getElementById('verify-error');
+  const successMsg = document.getElementById('verify-success');
+  const pickupDateInput = document.getElementById('pickup-date');
+  const returnDateInput = document.getElementById('return-date');
+  
+  if (choice === 'yes') {
+    driverLicenseVerified = false; // Will be true only when ID proof is selected
+    idProofSelect.disabled = false;
+    errorMsg.classList.remove('show');
+    
+    // Check if ID proof is selected
+    if (idProofSelect.value) {
+      selectedIdProof = idProofSelect.value;
+      driverLicenseVerified = true;
+      successMsg.classList.add('show');
+      pickupDateInput.disabled = false;
+      returnDateInput.disabled = false;
+    } else {
+      successMsg.classList.remove('show');
+      pickupDateInput.disabled = true;
+      returnDateInput.disabled = true;
+    }
+  } else if (choice === 'no') {
+    driverLicenseVerified = false;
+    selectedIdProof = '';
+    idProofSelect.disabled = true;
+    idProofSelect.value = '';
+    errorMsg.classList.add('show');
+    successMsg.classList.remove('show');
+    pickupDateInput.disabled = true;
+    returnDateInput.disabled = true;
+    pickupDateInput.value = '';
+    returnDateInput.value = '';
+  }
+}
+
+/* ── Night check ── */
+function checkNight() {
+  if (selectedGender !== 'female') { nightActive=false; calcPrice(); return; }
+  const t = document.getElementById('pickup-time').value;
+  if (!t) return;
+  nightActive = parseInt(t.split(':')[0]) >= 22;
+  document.getElementById('night-badge').style.display = nightActive ? 'inline-flex' : 'none';
+  calcPrice();
+}
+
+/* ── Price calc ── */
+function calcPrice() {
+  const pickup = document.getElementById('pickup-date').value;
+  const ret    = document.getElementById('return-date').value;
+  if (!pickup || !ret) return;
+  const days = Math.ceil((new Date(ret) - new Date(pickup)) / 86400000);
+  if (days < 1) return;
+
+  const dayAmt    = PRICE_PER_DAY * days;
+  const kmAmt     = PRICE_PER_KM * distanceKm;
+  const driverAmt = selectedMode==='driver' ? DRIVER_PER_DAY * days : 0;
+  const safetyAmt = nightActive ? SAFETY_CHARGE : 0;
+  const subtotal  = dayAmt + kmAmt + driverAmt + safetyAmt;
+  const gst       = Math.round(subtotal * 0.18);
+  const total     = subtotal + gst;
+  const fmt       = v => '₹' + Math.round(v).toLocaleString('en-IN');
+
+  document.getElementById('days-count').textContent = days;
+  document.getElementById('day-price').textContent  = fmt(dayAmt);
+
+  const kmRow = document.getElementById('km-row');
+  if (distanceKm > 0) {
+    kmRow.style.display='flex';
+    document.getElementById('km-count').textContent = distanceKm.toFixed(1);
+    document.getElementById('km-price').textContent = fmt(kmAmt);
+  } else kmRow.style.display='none';
+
+  const drvRow = document.getElementById('driver-row');
+  if (selectedMode==='driver') {
+    drvRow.style.display='flex';
+    document.getElementById('drv-days').textContent    = days;
+    document.getElementById('driver-price').textContent= fmt(driverAmt);
+  } else drvRow.style.display='none';
+
+  document.getElementById('safety-row').style.display = nightActive ? 'flex' : 'none';
+  document.getElementById('gst-amount').textContent   = fmt(gst);
+  document.getElementById('total-price').textContent  = fmt(total);
+  document.getElementById('price-breakdown').style.display = 'block';
+  document.getElementById('return-date').min = pickup;
+}
+
+/* ── Geocode ── */
+let geoTimeout={};
+function debounceGeocode(type) {
+  clearTimeout(geoTimeout[type]);
+  geoTimeout[type] = setTimeout(() => geocode(type), 800);
+}
+async function geocode(type) {
+  const val = document.getElementById(type==='pickup'?'pickup-loc':'drop-loc').value;
+  if (!val||val.length<3) return;
+  const res  = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&countrycodes=in&limit=1`);
+  const data = await res.json();
+  if (!data.length) return;
+  const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+  if (type==='pickup') {
+    pickupCoords = coords;
+    if (pickupMarker) map.removeLayer(pickupMarker);
+    pickupMarker = L.marker(coords,{icon:goldIcon}).addTo(map).bindPopup('📍 Pickup').openPopup();
+  } else {
+    dropCoords = coords;
+    if (dropMarker) map.removeLayer(dropMarker);
+    dropMarker = L.marker(coords,{icon:goldIcon}).addTo(map).bindPopup('🎯 Drop').openPopup();
+  }
+  if (pickupCoords&&dropCoords) drawRoute();
+  else map.setView(coords,12);
+}
+
+function drawRoute() {
+  if (routeLayer) map.removeLayer(routeLayer);
+  routeLayer = L.polyline([pickupCoords,dropCoords],
+    {color:'#f59e0b',weight:3.5,dashArray:'8,6',opacity:.85}).addTo(map);
+  map.fitBounds([pickupCoords,dropCoords],{padding:[40,40]});
+  distanceKm = map.distance(pickupCoords,dropCoords)/1000;
+  document.getElementById('dist-val').textContent   = distanceKm.toFixed(1)+' km';
+  document.getElementById('time-val').textContent   = Math.ceil(distanceKm/50)+'h '+Math.round((distanceKm%50)*60/50)+'m';
+  document.getElementById('km-cost-val').textContent= '₹'+Math.round(distanceKm*PRICE_PER_KM).toLocaleString('en-IN');
+  document.getElementById('route-info').style.display='flex';
+  calcPrice();
+}
+
+/* ── Book ── */
+async function proceedBooking() {
+  // Check driver verification first
+  if (!driverLicenseVerified) {
+    showToast('Please complete driver verification and select an ID proof type','error');
+    return;
+  }
+
+  const pickupDate = document.getElementById('pickup-date').value;
+  const returnDate = document.getElementById('return-date').value;
+  const pickupLoc  = document.getElementById('pickup-loc').value;
+  const dropLoc    = document.getElementById('drop-loc').value;
+  const pickupTime = document.getElementById('pickup-time').value;
+
+  if (!pickupDate||!returnDate||!pickupLoc||!dropLoc) { showToast('Please fill all fields','error'); return; }
+  if (Math.ceil((new Date(returnDate)-new Date(pickupDate))/86400000)<1) {
+    showToast('Return date must be after pickup date','error'); return;
+  }
+
+  /* Collect chosen safety features */
+  const safetyFeats = [];
+  if (selectedGender==='female') {
+    ['sf-sos','sf-track','sf-cam','sf-verify','sf-escort','sf-helpline'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el&&el.checked) safetyFeats.push(el.value);
+    });
+  }
+
+  const res = await fetch(`/book/${CAR_ID}`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      pickup_date:pickupDate, return_date:returnDate,
+      pickup_location:pickupLoc, drop_location:dropLoc,
+      pickup_time:pickupTime,
+      pickup_lat:pickupCoords?.[0], pickup_lng:pickupCoords?.[1],
+      drop_lat:dropCoords?.[0], drop_lng:dropCoords?.[1],
+      distance_km:distanceKm,
+      drive_type:selectedMode, gender:selectedGender,
+      safety_features:safetyFeats,
+      id_proof_type:selectedIdProof
+    })
+  });
+  const data = await res.json();
+  if (data.success) window.location.href = data.redirect;
+  else showToast(data.message||'Booking failed','error');
+}
+
+/* ── Reviews ── */
+function setRating(val) {
+  selectedRating=val;
+  document.querySelectorAll('.rating-star').forEach((s,i)=>s.classList.toggle('active',i<val));
+}
+async function submitReview() {
+  if (!selectedRating) { showToast('Select a rating first','error'); return; }
+  const res=await fetch('/api/review',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({car_id:CAR_ID,rating:selectedRating,comment:document.getElementById('review-text').value})});
+  const data=await res.json();
+  if (data.success) { showToast('Review submitted!','success'); setTimeout(()=>location.reload(),1500); }
+}
+
+/* ── Wishlist ── */
+async function toggleWishlist(carId,btn) {
+  const res=await fetch(`/wishlist/toggle/${carId}`,{method:'POST'});
+  const data=await res.json();
+  if (data.success) {
+    if (data.action==='added') { btn.innerHTML='<i class="fas fa-heart"></i> In Wishlist'; btn.className='btn btn-danger'; }
+    else { btn.innerHTML='<i class="fas fa-heart"></i> Wishlist'; btn.className='btn btn-secondary'; }
+    showToast(data.action==='added'?'Added to wishlist!':'Removed from wishlist','success');
+  }
+}
+</script>
+{% endblock %}

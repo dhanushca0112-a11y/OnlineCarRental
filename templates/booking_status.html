@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Booking Status - DCA Car Rentals{% endblock %}
+{% block content %}
+<style>
+.status-wrap { max-width: 700px; margin: 3rem auto; padding: 0 1rem; }
+.status-card {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 24px; padding: 2.5rem; text-align: center;
+    backdrop-filter: blur(20px); margin-bottom: 1.5rem;
+}
+.status-icon { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1.25rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+.status-icon.pending { background: rgba(245,158,11,0.1); color: var(--accent); border: 2px solid rgba(245,158,11,0.3); animation: pulse 2s infinite; }
+.status-icon.confirmed { background: rgba(16,185,129,0.1); color: var(--green); border: 2px solid rgba(16,185,129,0.3); }
+.status-icon.rejected { background: rgba(239,68,68,0.1); color: var(--red); border: 2px solid rgba(239,68,68,0.3); }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.status-title { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 0.5rem; }
+.status-subtitle { color: var(--text2); font-size: 0.95rem; line-height: 1.6; }
+.progress-tracker { display: flex; align-items: center; margin: 2rem 0; }
+.progress-step { flex: 1; text-align: center; }
+.progress-dot { width: 36px; height: 36px; border-radius: 50%; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; border: 2px solid var(--card-border); background: var(--bg3); color: var(--text2); }
+.progress-dot.done { background: var(--green); border-color: var(--green); color: #fff; }
+.progress-dot.active { background: var(--accent); border-color: var(--accent); color: #000; animation: pulse 2s infinite; }
+.progress-line { flex: 1; height: 2px; background: var(--card-border); margin: 0 -1px; position: relative; top: -18px; }
+.progress-line.done { background: var(--green); }
+.progress-label { font-size: 0.72rem; color: var(--text2); }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.detail-card {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 16px; padding: 1.5rem;
+}
+.detail-card h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.detail-row { display: flex; justify-content: space-between; font-size: 0.875rem; padding: 6px 0; border-bottom: 1px solid var(--card-border); }
+.detail-row:last-child { border-bottom: none; }
+.detail-row .key { color: var(--text2); }
+.detail-row .val { font-weight: 500; text-align: right; max-width: 180px; }
+.action-bar { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+.booking-id-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--accent); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; margin: 0.75rem 0; font-family: monospace; }
+@media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="status-wrap">
+    <!-- STATUS CARD -->
+    <div class="status-card">
+        {% if booking.status == 'confirmed' %}
+        <div class="status-icon confirmed"><i class="fas fa-check"></i></div>
+        <div class="status-title">Booking Confirmed! 🎉</div>
+        <p class="status-subtitle">Your payment has been verified and booking is confirmed. Enjoy your ride!</p>
+        {% elif booking.status == 'rejected' %}
+        <div class="status-icon rejected"><i class="fas fa-times"></i></div>
+        <div class="status-title">Booking Rejected</div>
+        <p class="status-subtitle">Unfortunately your payment could not be verified. Please contact support or try booking again.</p>
+        {% elif booking.status == 'cancelled' %}
+        <div class="status-icon rejected"><i class="fas fa-ban"></i></div>
+        <div class="status-title">Booking Cancelled</div>
+        <p class="status-subtitle">This booking has been cancelled.</p>
+        {% else %}
+        <div class="status-icon pending"><i class="fas fa-hourglass-half"></i></div>
+        <div class="status-title">Awaiting Confirmation</div>
+        <p class="status-subtitle">Your payment has been submitted and is pending admin verification. Usually takes 30–60 minutes.</p>
+        {% endif %}
+
+        <div class="booking-id-badge"><i class="fas fa-ticket-alt"></i> {{ booking.booking_id }}</div>
+
+        <!-- PROGRESS TRACKER -->
+        <div class="progress-tracker">
+            <div class="progress-step">
+                <div class="progress-dot done"><i class="fas fa-check"></i></div>
+                <div class="progress-label">Booked</div>
+            </div>
+            <div class="progress-line done"></div>
+            <div class="progress-step">
+                <div class="progress-dot {% if booking.payment_status in ['paid','confirmed'] %}done{% elif booking.status == 'payment_pending' %}active{% endif %}">
+                    {% if booking.payment_status in ['paid','confirmed'] %}<i class="fas fa-check"></i>{% else %}2{% endif %}
+                </div>
+                <div class="progress-label">Payment</div>
+            </div>
+            <div class="progress-line {% if booking.status == 'confirmed' %}done{% endif %}"></div>
+            <div class="progress-step">
+                <div class="progress-dot {% if booking.status == 'confirmed' %}done{% elif booking.status == 'payment_pending' and booking.payment_status == 'paid' %}active{% endif %}">
+                    {% if booking.status == 'confirmed' %}<i class="fas fa-check"></i>{% else %}3{% endif %}
+                </div>
+                <div class="progress-label">Verified</div>
+            </div>
+            <div class="progress-line {% if booking.status in ['confirmed','completed'] %}done{% endif %}"></div>
+            <div class="progress-step">
+                <div class="progress-dot {% if booking.status == 'completed' %}done{% endif %}">4</div>
+                <div class="progress-label">Completed</div>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <a href="/invoice/{{ booking.id }}" target="_blank" class="btn btn-secondary">
+                <i class="fas fa-file-invoice"></i> View Invoice
+            </a>
+            <a href="/my-bookings" class="btn btn-secondary">
+                <i class="fas fa-list"></i> My Bookings
+            </a>
+            {% if booking.status in ['payment_pending'] %}
+            <button class="btn btn-danger" onclick="cancelBooking()">
+                <i class="fas fa-times"></i> Cancel Booking
+            </button>
+            {% endif %}
+            <a href="/cars" class="btn btn-primary">
+                <i class="fas fa-car"></i> Book Another
+            </a>
+        </div>
+    </div>
+
+    <!-- DETAILS -->
+    <div class="detail-grid">
+        <div class="detail-card">
+            <h3><i class="fas fa-car" style="color:var(--accent)"></i> Car Details</h3>
+            <div class="detail-row"><span class="key">Car</span><span class="val">{{ car.name }}</span></div>
+            <div class="detail-row"><span class="key">Brand</span><span class="val">{{ car.brand }}</span></div>
+            <div class="detail-row"><span class="key">Category</span><span class="val">{{ car.category }}</span></div>
+            <div class="detail-row"><span class="key">Fuel</span><span class="val">{{ car.fuel_type }}</span></div>
+            <div class="detail-row"><span class="key">Seats</span><span class="val">{{ car.seats }}</span></div>
+        </div>
+        <div class="detail-card">
+            <h3><i class="fas fa-calendar" style="color:var(--accent)"></i> Trip Details</h3>
+            <div class="detail-row"><span class="key">Pickup Date</span><span class="val">{{ booking.pickup_date.strftime('%d %b %Y') }}</span></div>
+            <div class="detail-row"><span class="key">Return Date</span><span class="val">{{ booking.return_date.strftime('%d %b %Y') }}</span></div>
+            <div class="detail-row"><span class="key">Duration</span><span class="val">{{ booking.days }} day{{ 's' if booking.days > 1 else '' }}</span></div>
+            <div class="detail-row"><span class="key">Pickup</span><span class="val">{{ booking.pickup_location }}</span></div>
+            <div class="detail-row"><span class="key">Drop</span><span class="val">{{ booking.drop_location }}</span></div>
+        </div>
+        <div class="detail-card">
+            <h3><i class="fas fa-rupee-sign" style="color:var(--accent)"></i> Payment Details</h3>
+            <div class="detail-row"><span class="key">Ride Mode</span><span class="val">{{ '🚗 Self Drive' if booking.drive_type == 'self' else '👨‍✈️ With Driver' }}</span></div>
+            <div class="detail-row"><span class="key">Gender</span><span class="val">{{ '♂ Male' if booking.gender == 'male' else '♀ Female' }}</span></div>
+            {% if booking.night_safety %}<div class="detail-row"><span class="key">Night Safety</span><span class="val" style="color:#ec4899;">🌙 Applied (after 10 PM)</span></div>{% endif %}
+            <div class="detail-row"><span class="key">Day Charge</span><span class="val">₹{{ "{:,.0f}".format(booking.base_day_amount) }}</span></div>
+            {% if booking.base_km_amount > 0 %}<div class="detail-row"><span class="key">KM Charge</span><span class="val">₹{{ "{:,.0f}".format(booking.base_km_amount) }}</span></div>{% endif %}
+            {% if booking.driver_amount > 0 %}<div class="detail-row"><span class="key">Driver Charge</span><span class="val">₹{{ "{:,.0f}".format(booking.driver_amount) }}</span></div>{% endif %}
+            {% if booking.safety_amount > 0 %}<div class="detail-row"><span class="key">Night Safety Fee</span><span class="val" style="color:#ec4899;">₹{{ "{:,.0f}".format(booking.safety_amount) }}</span></div>{% endif %}
+            <div class="detail-row"><span class="key">GST (18%)</span><span class="val">₹{{ "{:,.0f}".format(booking.gst_amount) }}</span></div>
+            <div class="detail-row"><span class="key">Total Paid</span><span class="val" style="color:var(--accent);font-weight:700;">₹{{ "{:,.0f}".format(booking.final_amount) }}</span></div>
+            <div class="detail-row"><span class="key">Method</span><span class="val">{{ booking.payment_method or 'UPI' }}</span></div>
+            <div class="detail-row"><span class="key">Status</span>
+                <span class="val">
+                    {% if booking.payment_status == 'confirmed' %}<span class="badge badge-success">Confirmed</span>
+                    {% elif booking.payment_status == 'paid' %}<span class="badge badge-warning">Under Review</span>
+                    {% elif booking.payment_status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+                    {% else %}<span class="badge badge-secondary">Unpaid</span>{% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="detail-card">
+            <h3><i class="fas fa-info-circle" style="color:var(--accent)"></i> Booking Info</h3>
+            <div class="detail-row"><span class="key">Booking ID</span><span class="val" style="font-family:monospace">{{ booking.booking_id }}</span></div>
+            <div class="detail-row"><span class="key">Booked On</span><span class="val">{{ booking.created_at.strftime('%d %b %Y %I:%M %p') }}</span></div>
+            {% if booking.upi_transaction_id %}
+            <div class="detail-row"><span class="key">UTR/Ref No.</span><span class="val" style="font-family:monospace;font-size:0.8rem">{{ booking.upi_transaction_id }}</span></div>
+            {% endif %}
+            <div class="detail-row"><span class="key">Booking Status</span>
+                <span class="val">
+                    {% if booking.status == 'confirmed' %}<span class="badge badge-success">Confirmed</span>
+                    {% elif booking.status == 'payment_pending' %}<span class="badge badge-warning">Pending</span>
+                    {% elif booking.status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+                    {% elif booking.status == 'cancelled' %}<span class="badge badge-danger">Cancelled</span>
+                    {% else %}<span class="badge badge-secondary">{{ booking.status }}</span>{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function cancelBooking() {
+    if (!confirm('Are you sure you want to cancel this booking?')) return;
+    const res = await fetch('/api/cancel-booking/{{ booking.id }}', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) { showToast('Booking cancelled', 'success'); setTimeout(() => location.reload(), 1500); }
+    else showToast(data.message || 'Cannot cancel', 'error');
+}
+</script>
+{% endblock %}

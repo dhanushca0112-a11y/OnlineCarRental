@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <style>
+      .gpay-text { font-family: 'Roboto', sans-serif; font-size: 12px; font-weight: 500; }
+      .gpay-g { fill: #3C4043; }
+      .gpay-p { fill: #3C4043; }
+      .gpay-a { fill: #3C4043; }
+      .gpay-y { fill: #3C4043; }
+    </style>
+  </defs>
+  <rect width="48" height="48" fill="none"/>
+  <text class="gpay-text gpay-g" x="4" y="28" font-weight="bold">G</text>
+  <text class="gpay-text gpay-p" x="14" y="28" font-weight="bold">P</text>
+  <text class="gpay-text gpay-a" x="22" y="28" font-weight="bold">a</text>
+  <text class="gpay-text gpay-y" x="28" y="28" fill="#EA4335">y</text>
+</svg>

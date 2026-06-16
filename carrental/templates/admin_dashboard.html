@@ -1,0 +1,264 @@
+{% extends "admin_base.html" %}
+{% block title %}Dashboard — DCA Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Overview{% endblock %}
+{% block extra_css %}
+<style>
+.mini-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
+.mini-stat{background:var(--bg3);border-radius:10px;padding:.85rem 1rem;display:flex;align-items:center;gap:.75rem}
+.mini-stat-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.mini-stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem}
+.mini-stat-lbl{font-size:.7rem;color:var(--text2)}
+.recent-booking-row{display:flex;align-items:center;gap:.75rem;padding:.85rem;border-radius:10px;transition:background .2s;margin-bottom:3px}
+.recent-booking-row:hover{background:var(--bg3)}
+.rb-car-img{width:52px;height:36px;border-radius:7px;object-fit:cover;flex-shrink:0}
+.rb-name{font-weight:600;font-size:.84rem}
+.rb-meta{font-size:.72rem;color:var(--text2);margin-top:1px}
+.rb-amount{font-family:'Syne',sans-serif;font-weight:800;color:var(--accent);font-size:.9rem;flex-shrink:0}
+.quick-action{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:1.25rem;
+  display:flex;flex-direction:column;gap:.5rem;
+  align-items:flex-start;transition:all .25s;cursor:pointer;
+}
+.quick-action:hover{border-color:var(--border-h);transform:translateY(-2px);box-shadow:0 12px 24px rgba(0,0,0,.25)}
+.qa-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:.25rem}
+.qa-title{font-weight:700;font-size:.84rem}
+.qa-sub{font-size:.72rem;color:var(--text2)}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ══ ALERT ══ -->
+{% if pending_payments > 0 %}
+<div class="alert-banner">
+  <div class="alert-banner-left">
+    <div class="alert-dot"></div>
+    <div>
+      <div style="font-weight:700;font-size:.9rem;">{{ pending_payments }} payment{{ 's' if pending_payments>1 else '' }} awaiting verification</div>
+      <div style="font-size:.75rem;color:var(--text2);">Review and confirm to activate customer bookings</div>
+    </div>
+  </div>
+  <a href="/admin/payments" class="btn btn-primary btn-sm">
+    Review Now <i class="fas fa-arrow-right"></i>
+  </a>
+</div>
+{% endif %}
+
+<!-- ══ STAT CARDS ══ -->
+<div class="stat-grid">
+  <div class="stat-card" style="color:var(--accent)">
+    <div class="stat-icon" style="background:rgba(245,158,11,.1);color:var(--accent)">
+      <i class="fas fa-users"></i>
+    </div>
+    <div>
+      <div class="stat-val" style="color:var(--accent)">{{ total_users }}</div>
+      <div class="stat-lbl">Total Customers</div>
+      <div class="stat-sub up"><i class="fas fa-arrow-up"></i> Active accounts</div>
+    </div>
+  </div>
+  <div class="stat-card" style="color:var(--blue)">
+    <div class="stat-icon" style="background:rgba(59,130,246,.1);color:var(--blue)">
+      <i class="fas fa-car"></i>
+    </div>
+    <div>
+      <div class="stat-val" style="color:var(--blue)">{{ total_cars }}</div>
+      <div class="stat-lbl">Fleet Size</div>
+      <div class="stat-sub note"><i class="fas fa-circle"></i> Cars managed</div>
+    </div>
+  </div>
+  <div class="stat-card" style="color:var(--green)">
+    <div class="stat-icon" style="background:rgba(16,185,129,.1);color:var(--green)">
+      <i class="fas fa-calendar-check"></i>
+    </div>
+    <div>
+      <div class="stat-val" style="color:var(--green)">{{ total_bookings }}</div>
+      <div class="stat-lbl">Total Bookings</div>
+      <div class="stat-sub up"><i class="fas fa-check"></i> {{ confirmed_bookings }} confirmed</div>
+    </div>
+  </div>
+  <div class="stat-card" style="color:var(--purple)">
+    <div class="stat-icon" style="background:rgba(139,92,246,.1);color:var(--purple)">
+      <i class="fas fa-rupee-sign"></i>
+    </div>
+    <div>
+      <div class="stat-val" style="color:var(--purple)">₹{{ "{:,.0f}".format(total_revenue) }}</div>
+      <div class="stat-lbl">Total Revenue</div>
+      <div class="stat-sub up"><i class="fas fa-arrow-up"></i> Confirmed only</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CHARTS ══ -->
+<div class="chart-grid">
+  <div class="chart-card">
+    <h3><i class="fas fa-chart-line"></i> Revenue — Last 6 Months</h3>
+    <canvas id="revenueChart" height="90"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3><i class="fas fa-chart-donut"></i> Booking Status</h3>
+    <canvas id="statusChart" height="180"></canvas>
+    <div class="mini-stat-row" style="margin-top:1rem;">
+      <div class="mini-stat">
+        <div class="mini-stat-icon" style="background:rgba(16,185,129,.12);color:var(--green)"><i class="fas fa-check"></i></div>
+        <div><div class="mini-stat-val">{{ confirmed_bookings }}</div><div class="mini-stat-lbl">Confirmed</div></div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-icon" style="background:rgba(245,158,11,.12);color:var(--accent)"><i class="fas fa-clock"></i></div>
+        <div><div class="mini-stat-val">{{ pending_payments }}</div><div class="mini-stat-lbl">Pending</div></div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-icon" style="background:rgba(239,68,68,.12);color:var(--red)"><i class="fas fa-times"></i></div>
+        <div><div class="mini-stat-val">{{ total_bookings - confirmed_bookings - pending_payments if total_bookings > confirmed_bookings + pending_payments else 0 }}</div><div class="mini-stat-lbl">Other</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOTTOM GRID ══ -->
+<div style="display:grid;grid-template-columns:1fr 320px;gap:1.25rem;">
+
+  <!-- Recent Bookings -->
+  <div class="table-card">
+    <div class="table-head">
+      <h3><i class="fas fa-clock"></i> Recent Bookings</h3>
+      <a href="/admin/bookings" class="btn btn-secondary btn-sm">View All <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div style="padding:.75rem 1rem;">
+      {% for item in recent_data %}
+      <div class="recent-booking-row">
+        {% if item.car %}
+        <img src="{{ item.car.image_url }}" class="rb-car-img"
+             onerror="this.src='https://via.placeholder.com/52x36/0a0e18/f59e0b?text=Car'">
+        {% endif %}
+        <div style="flex:1;min-width:0;">
+          <div class="rb-name">{{ item.user.name if item.user else 'N/A' }}</div>
+          <div class="rb-meta">
+            {{ item.car.name if item.car else '' }} ·
+            {{ item.booking.pickup_date.strftime('%d %b') }} →
+            {{ item.booking.return_date.strftime('%d %b') }}
+            {% if item.booking.drive_type == 'driver' %}
+            · <span style="color:var(--blue);font-size:.68rem;">👨‍✈️ Driver</span>
+            {% endif %}
+            {% if item.booking.gender == 'female' %}
+            · <span style="color:var(--pink);font-size:.68rem;">♀</span>
+            {% endif %}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <div class="rb-amount">₹{{ "{:,.0f}".format(item.booking.final_amount) }}</div>
+          {% if item.booking.payment_status == 'paid' and item.booking.status == 'payment_pending' %}
+          <div style="display:flex;gap:3px;">
+            <button class="btn btn-success btn-sm btn-icon" onclick="confirmPay({{ item.booking.id }})" title="Confirm"><i class="fas fa-check"></i></button>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="rejectPay({{ item.booking.id }})" title="Reject"><i class="fas fa-times"></i></button>
+          </div>
+          {% elif item.booking.status == 'confirmed' %}
+          <span class="badge badge-success">Confirmed</span>
+          {% elif item.booking.status == 'payment_pending' %}
+          <span class="badge badge-warning">Pending</span>
+          {% elif item.booking.status == 'cancelled' %}
+          <span class="badge badge-danger">Cancelled</span>
+          {% else %}
+          <span class="badge badge-secondary">{{ item.booking.status }}</span>
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:2rem;color:var(--text2);font-size:.875rem;">No bookings yet</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin-bottom:.85rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;">Quick Actions</div>
+    <div style="display:flex;flex-direction:column;gap:.65rem;">
+      <a href="/admin/car/add" class="quick-action">
+        <div class="qa-icon" style="background:rgba(245,158,11,.1);color:var(--accent)"><i class="fas fa-plus"></i></div>
+        <div class="qa-title">Add New Car</div>
+        <div class="qa-sub">Add a vehicle to your fleet</div>
+      </a>
+      <a href="/admin/payments" class="quick-action">
+        <div class="qa-icon" style="background:rgba(16,185,129,.1);color:var(--green)"><i class="fas fa-credit-card"></i></div>
+        <div class="qa-title">Verify Payments</div>
+        <div class="qa-sub">{{ pending_payments }} pending review</div>
+      </a>
+      <a href="/admin/bookings" class="quick-action">
+        <div class="qa-icon" style="background:rgba(59,130,246,.1);color:var(--blue)"><i class="fas fa-calendar-alt"></i></div>
+        <div class="qa-title">All Bookings</div>
+        <div class="qa-sub">{{ total_bookings }} total bookings</div>
+      </a>
+      <a href="/admin/users" class="quick-action">
+        <div class="qa-icon" style="background:rgba(139,92,246,.1);color:var(--purple)"><i class="fas fa-users"></i></div>
+        <div class="qa-title">Customers</div>
+        <div class="qa-sub">{{ total_users }} registered users</div>
+      </a>
+      <a href="/admin/cars" class="quick-action">
+        <div class="qa-icon" style="background:rgba(236,72,153,.1);color:var(--pink)"><i class="fas fa-car"></i></div>
+        <div class="qa-title">Manage Fleet</div>
+        <div class="qa-sub">{{ total_cars }} cars in fleet</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const monthly = {{ monthly_data|safe }};
+
+/* Revenue Chart */
+const rCtx = document.getElementById('revenueChart').getContext('2d');
+const grad = rCtx.createLinearGradient(0,0,0,200);
+grad.addColorStop(0,'rgba(245,158,11,.18)');
+grad.addColorStop(1,'rgba(245,158,11,0)');
+new Chart(rCtx, {
+  type:'line',
+  data:{
+    labels: monthly.map(d=>d.month),
+    datasets:[{
+      label:'Revenue (₹)',
+      data: monthly.map(d=>d.revenue),
+      borderColor:'#f59e0b',backgroundColor:grad,
+      borderWidth:2.5,fill:true,tension:.4,
+      pointBackgroundColor:'#f59e0b',pointRadius:5,pointHoverRadius:8,
+      pointBorderColor:'#000',pointBorderWidth:2
+    }]
+  },
+  options:{
+    responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'₹'+ctx.parsed.y.toLocaleString('en-IN')}}},
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7d8fa3',font:{size:11}}},
+      y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#7d8fa3',font:{size:11},callback:v=>'₹'+v.toLocaleString('en-IN')}}
+    }
+  }
+});
+
+/* Status Donut */
+new Chart(document.getElementById('statusChart'), {
+  type:'doughnut',
+  data:{
+    labels:['Confirmed','Pending','Rejected/Other'],
+    datasets:[{
+      data:[{{ confirmed_bookings }},{{ pending_payments }},{{ [0, total_bookings - confirmed_bookings - pending_payments]|sort|last }}],
+      backgroundColor:['#10b981','#f59e0b','#ef4444'],
+      borderWidth:0,hoverOffset:8
+    }]
+  },
+  options:{
+    responsive:true,cutout:'72%',
+    plugins:{legend:{position:'bottom',labels:{color:'#7d8fa3',padding:14,font:{size:11}}}}
+  }
+});
+
+async function confirmPay(id){
+  if(!confirm('Confirm this payment and activate booking?'))return;
+  const d=await apiAction(`/admin/payment/confirm/${id}`);
+  if(d.success){showToast('Booking confirmed!','success');setTimeout(()=>location.reload(),1200);}
+}
+async function rejectPay(id){
+  if(!confirm('Reject this payment?'))return;
+  const d=await apiAction(`/admin/payment/reject/${id}`);
+  if(d.success){showToast('Payment rejected','error');setTimeout(()=>location.reload(),1200);}
+}
+</script>
+{% endblock %}
